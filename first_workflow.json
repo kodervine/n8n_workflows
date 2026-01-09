@@ -1,0 +1,333 @@
+{
+  "name": "first_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Salary Dataset",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "FirstName",
+              "fieldLabel": "First Name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "LastName",
+              "fieldLabel": "Last Name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Email",
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Salary",
+              "fieldLabel": "Salary",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "0-800k"
+                  },
+                  {
+                    "option": "800k+"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldName": "Message",
+              "fieldLabel": "Message"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "329410c2-43e6-413a-b248-5bf3a73fdc1a",
+      "name": "On form submission",
+      "webhookId": "f2b4455e-56d2-4963-92f4-bd92c3cb5d3d"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1g2kQoXX_CUUyj8p7vOESfCtdlqM6Sz3dIFg59BNXP6A",
+          "mode": "list",
+          "cachedResultName": "N8N Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g2kQoXX_CUUyj8p7vOESfCtdlqM6Sz3dIFg59BNXP6A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g2kQoXX_CUUyj8p7vOESfCtdlqM6Sz3dIFg59BNXP6A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First Name": "={{ $json.FirstName }}",
+            "Last Name": "={{ $json.LastName }}",
+            "Email": "={{ $json.Email }}",
+            "Salary": "={{ $json.Salary }}",
+            "Message": "={{ $json.Message }}",
+            "Tax Status": "={{ $if($json.Salary == \"800k+\", \"To pay Tax\", \"No Pay Tax\") }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Salary",
+              "displayName": "Salary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tax Status",
+              "displayName": "Tax Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "312861fa-048e-4fe9-91be-e8202c0be252",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8TwIBZlgf84dulaI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Salary }}",
+                    "rightValue": "0-800k",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e1bf88ac-5aee-4ae3-8101-ecbfd8b98601"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "96f35806-40eb-44ec-bb82-aea7728e13e7",
+                    "leftValue": "={{ $json.Salary }}",
+                    "rightValue": "800k+",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "52983ce9-59d4-4899-a82f-0bbaa558145b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Tax Status",
+        "emailType": "text",
+        "message": "=Dear  {{ $('On form submission').item.json.FirstName }},\n\nYou are paying taxes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        96
+      ],
+      "id": "0139fc19-692d-4611-94ea-db796f5306c2",
+      "name": "Condition: User is Paying Tax",
+      "webhookId": "81742372-d51c-4bf9-8a74-80170294e21c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dA9LTnkhHifKhbxj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Tax Status",
+        "emailType": "text",
+        "message": "=Dear  {{ $('On form submission').item.json.FirstName }},\n\nYou are not being taxed.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        -64
+      ],
+      "id": "76f6b4d3-a703-4e06-9b61-63da5b5a0823",
+      "name": "Condition: User is not Paying Tax",
+      "webhookId": "0e789dc2-e33f-4481-a8a2-5252fa4034ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dA9LTnkhHifKhbxj",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Condition: User is not Paying Tax",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Condition: User is Paying Tax",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b96eaf83-0946-448a-b438-42e59d0dbf3a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "U0jSc2MesCy6loL69Z9hg",
+  "tags": []
+}

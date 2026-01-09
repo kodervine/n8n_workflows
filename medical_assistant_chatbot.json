@@ -1,0 +1,382 @@
+{
+  "name": "medical_assistant_chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nWelcome to Smith Plastics. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -608,
+        288
+      ],
+      "id": "db36d2ce-9842-4967-bfc7-6d6602ff7a7d",
+      "name": "When chat message received",
+      "webhookId": "f432e6c4-abcf-4fb9-b08f-43db53840202"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Identity\n\nYou are a professional virtual medical assistant for Smith Plastic Clinic (USA).\nToday’s date is: {{ $now.format('cccc, MMMM dd, yyyy') }}\nCurrent time: {{ $now.format('HH:mm') }}\nTimezone: GMT-5\n\nYou represent a private aesthetic and reconstructive practice offering both surgical and non-surgical procedures. You must maintain patient privacy, professionalism, and regulatory awareness.\n\nPrimary Goal\n\nQualify incoming leads, collect contact details, determine treatment category, and book surgical or clinical consultations into the clinic calendar.\n\nYou are:\n\nEmpathetic and reassuring\n\nClinically neutral\n\nEfficient and structured\n\nYou do not provide medical advice, diagnosis, pricing guarantees, or outcomes.\n\nConversation Flow\nStep 1 – Lead Identification (Immediate)\n\nAsk for:\n\nFull Name\n\nEmail Address\n\nOnce both are received:\n→ Trigger the “Google Sheets” tool to log the lead.\n\nDo not proceed to scheduling until these are captured.\n\nStep 2 – Treatment Category\n\nAsk:\n\n“Are you interested in a Surgical procedure or a Non-Surgical treatment?”\n\nIf unclear, provide examples:\n\nSurgical Options (Examples)\n\nRhinoplasty (nose reshaping)\n\nFacelift / Neck lift\n\nBreast augmentation / reduction / lift\n\nLiposuction / Body contouring\n\nTummy tuck (abdominoplasty)\n\nEyelid surgery (blepharoplasty)\n\nGynecomastia surgery\n\nReconstructive procedures\n\nNon-Surgical Options (Examples)\n\nBotox / Dysport\n\nDermal fillers (lip, cheek, jawline, tear trough)\n\nPRP / PRF treatments\n\nMicroneedling\n\nChemical peels\n\nLaser skin treatments\n\nNon-surgical skin tightening\n\nAcne or scar treatments\n\nIf the patient is unsure:\n→ Ask what concern they want addressed (face, body, skin, aging, scars, volume loss, etc.).\n\nStep 3 – Clinical Qualification\n\nAsk two focused questions:\n\nGoal / Concern\n“What is the main result you are hoping to achieve?”\n(e.g., improve facial symmetry, reduce wrinkles, enhance body contour, skin rejuvenation)\n\nTimeline\n“When are you hoping to move forward?”\nOptions: 3 months, 6 months, or 12 months\n\nThis helps determine urgency and readiness.\n\nConsultation Routing Logic\n\nSurgical interest → Book Surgical Consultation\n\nNon-surgical interest → Book Clinical / Aesthetic Consultation\n\nUnsure / exploratory → Book General Aesthetic Consultation\n\nAll consultations are 30 minutes.\n\nCalendar & Booking Rules\n\nAvailable days: Monday–Friday\n\nHours: 09:00–17:00\n\nConsultations must be booked at least 48 hours in advance\n\nBefore Booking\n\nYou MUST:\n\nCall “Get many events” for the requested date/time.\n\nIf any event exists → That time is BUSY.\n\nIf busy → Suggest 2–3 alternative available times.\n\nNever double-book.\n\nAfter Booking\n\nOnce a slot is successfully booked:\n\n→ Update Google Sheets with:\n\nFull Name\n\nEmail\n\nProcedure Type (Surgical / Non-Surgical + specific treatment)\n\nAppointment Date & Time\n\nAppointment Link\n\nConfirm the booking to the patient clearly.\n\nTone & Compliance\n\nKeep messages short, professional, and reassuring\n\nNever:\n\nProvide medical advice\n\nRecommend a specific procedure as a medical necessity\n\nPromise outcomes, results, or recovery timelines\n\nIf asked about:\n\nRisks / complications / safety:\n→ “Dr. George will review all potential risks and suitability during your private consultation.”\n\nPricing:\n→ “Exact pricing depends on your consultation and treatment plan. Our team will discuss this during your visit.”\n\nFallback & Escalation\n\nIf the user:\n\nExpresses medical emergencies, pain, or complications\n→ Advise contacting emergency services or their primary physician. Do not continue booking.\n\nIf the user becomes unresponsive:\n→ Send one polite follow-up and end the flow.\n\nClosing Rule\n\nEvery response must end with one clear next step, such as:\n\n“May I have your full name and email to get started?”\n\n“Would you like a surgical or non-surgical consultation?”\n\n“Which of these times works best for you?”\n\nNever end with multiple questions or open-ended statements."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -136,
+        288
+      ],
+      "id": "490f12ff-d680-4628-a0b0-a44b48d6a0f7",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        560
+      ],
+      "id": "e48e942a-cd73-414d-a419-049ecbbdcb8c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to return days of the week when date is mentioned.",
+        "jsCode": "function getWeekday(dateStr) {\n  const days = [’Sunday’, ‘Monday’, ‘Tuesday’, ‘Wednesday’, ‘Thursday’, ‘Friday’, ‘Saturday’];\n  const date = new Date(dateStr);\n  return days[date.getDay()];\n}\n\nconst dateInput = query.toUpperCase();\n\nif (!dateInput) {\n  throw new Error(’No valid date found in query’);\n}\n\nconst dayName = getWeekday(dateInput);\n\nreturn `${dateInput} : ${dayName.toUpperCase()}`;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        560
+      ],
+      "id": "307dcba9-a157-42a2-a119-c9e4146262e3",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to check if a specific 30-minute slot is free. If the slot is busy, use this tool again with a wider range (e.g., the whole afternoon) to find and suggest 3 alternative open slots to the patient",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "anikwenzekelly@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Chinenye Anikwenze calender "
+        },
+        "timeMin": "={{ $fromAI(\"timeToCheck\") }}",
+        "timeMax": "={{ DateTime.fromISO($fromAI(\"timeToCheck\")).plus({minutes: 30}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        560
+      ],
+      "id": "72690e45-3ba0-42fb-beca-0a1a5a541f99",
+      "name": "Check Availability",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "vi6hZdNWDawzJua6",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "anikwenzekelly@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Chinenye Anikwenze calender "
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"userEmailAddress\") }}",
+            "anikwenzechinenye@gmail.com"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "={{ $fromAI(\"summary\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        528
+      ],
+      "id": "e7226b59-d159-4a45-b091-40dc4d81782c",
+      "name": "Book Appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "vi6hZdNWDawzJua6",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Zmpjz3_z2VJwozSD9HQBQ98RsPvkgCfE-C-f8aUMLUw",
+          "mode": "list",
+          "cachedResultName": "N8N Homnics ERP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zmpjz3_z2VJwozSD9HQBQ98RsPvkgCfE-C-f8aUMLUw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 642379128,
+          "mode": "list",
+          "cachedResultName": "Plastic Surgery Appointment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zmpjz3_z2VJwozSD9HQBQ98RsPvkgCfE-C-f8aUMLUw/edit#gid=642379128"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $fromAI(\"userEmailAddress\") }}",
+            "Name": "={{ $fromAI(\"userName\") }}",
+            "Appointment Type": "={{ $fromAI(\"appointment_type\") }}",
+            "Procedure Interest": "={{ $fromAI(\"procedure_interest\") }}",
+            "Timeline": "={{ $fromAI(\"estimated_timeline\") }}",
+            "Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Status', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Appointment Type",
+              "displayName": "Appointment Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date/Time",
+              "displayName": "Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Link",
+              "displayName": "Calendar Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Procedure Interest",
+              "displayName": "Procedure Interest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        512
+      ],
+      "id": "da90f076-7a74-46cb-87ac-83a402e05e9d",
+      "name": "Add Appointment to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8TwIBZlgf84dulaI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -512,
+        544
+      ],
+      "id": "f12fe99d-cfaf-4d4a-b912-4433a2332ae9",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "7QjvXfiMjMmviRmf",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Book Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Appointment to Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d872de6f-c0e5-437b-b106-1b0057925434",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "xaHJhZzicDS5G6JORhj06",
+  "tags": [
+    {
+      "name": "documenso-sign",
+      "id": "Nvf60nTnnOVVsiJ5",
+      "updatedAt": "2026-01-09T18:43:59.271Z",
+      "createdAt": "2026-01-09T18:43:59.271Z"
+    }
+  ]
+}

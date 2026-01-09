@@ -1,0 +1,116 @@
+{
+  "name": "RSS_Fetcher",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "target_feeds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0306f39c-2a16-40b9-8b7b-3df3313dc4d0",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{   \n{\n  \n  \n\"CISA Gov\": \n\"https://www.cisa.gov/cybersecurity-advisories/all.xml\",\n  \n  \n\"HackerNews\": \n\"https://feeds.feedburner.com/TheHackersNews\",\n  \n  \n\"Bleeping Computer\": \n\"https://www.bleepingcomputer.com/feed/\",\n  \n  \n\"Krebs on Security\": \n\"https://krebsonsecurity.com/feed/\",\n  \n  \n\"https://nvd\": \n{\n  \n  \n  \n\"nist\": \n{\n  \n  \n  \n  \n\"gov/feeds/xml/cve/misc/nvd-rss\": \n{\n  \n  \n  \n  \n  \n\"xml\": \n\"NVD NIST CVE\"\n  \n  \n  \n  \n}\n  \n  \n  \n}\n  \n  \n},\n  \n  \n\"Dark Reading\": \n\"https://www.darkreading.com/rss.xml\",\n  \n  \n\"Unit 42 Apollo\": \n\"https://unit42.paloaltonetworks.com/feed/\",\n  \n  \n\"ThreatPost\": \n\"https://threatpost.com/feed/\",\n  \n  \n\"SANS Internet Storm Center\": \n\"https://isc.sans.edu/rssfeed.xml\",\n  \n  \n\"ZDNet Security\": \n\"https://www.zdnet.com/topic/security/rss.xml\"\n  \n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3b2b785d-d55f-4ef0-92c8-30e2c0455e72",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the JSON object from the previous node\nconst masterData = $input.first().json;\n\n// Map the keys into a standard array n8n can handle\nreturn Object.keys(masterData).map(key => {\n  return {\n    name: key,\n    // Handle the nested NVD URL specifically if needed, \n    // or just pass the whole value\n    url: typeof masterData[key] === 'string' ? masterData[key] : \"https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml\" \n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "2e009246-0d3b-4622-9bb3-5b574408aecc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.url }}",
+        "options": {
+          "scope": "workflow"
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "a557e336-da37-4ba2-9661-5baa6b5eb105",
+      "name": "Remove Duplicates"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a0119455-3e29-472d-a0e4-bb21384ee1b2",
+  "meta": {
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "CKCxxuy5e0ynjfzmztH16",
+  "tags": []
+}

@@ -1,0 +1,269 @@
+{
+  "name": "industry_news_sentinel",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://www.google.com.ng/alerts/feeds/01419995854057872087/10618343237149338001"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b453881d-e05a-40aa-88fd-8d580fdddb11",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional business analyst. I will provide a news title and snippet.\n\nSummarize it in exactly one bullet point.\n\nCategorize it as [Competitor Move], [Industry News], or [Market Trend].\n\nRate the importance from 1-5. News: {{ $json.title }} - {{ $json.contentSnippet }}\""
+            },
+            {
+              "content": "My writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\"-\") with a dot (\".\") to start a new sentence, or a comma (\",\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI.",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a773bea0-2df4-4764-96d2-0637aca53285",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wBKty3a8SBjJTItJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.link }}",
+        "options": {
+          "scope": "workflow"
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "dd4ef9b8-e312-4095-95fb-08699fdadad2",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7MKG2VT3",
+          "mode": "list",
+          "cachedResultName": "all-cysafepath"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ $json.blocks }}",
+        "text": "=Daily Market Report\n",
+        "otherOptions": {
+          "link_names": false,
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1216,
+        -304
+      ],
+      "id": "19c51925-c787-4596-afa3-b35a6921ffb6",
+      "name": "Send a message",
+      "webhookId": "7e4d2c2a-7de4-4107-b42a-61b5c0018fb1",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "5WoWDHXvSJ70QpB1",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.content.parts[0].text;\nconst cleanData = JSON.parse(rawText);\n\nconst originalTitle =  $('RSS Feed Trigger').first().json.title;\nconst originalLink = $('RSS Feed Trigger').first().json.link;\n\nreturn {\n  title: originalTitle,\n  link: originalLink,\n  summary: cleanData.summary[0],\n  category: cleanData.category,\n  importance: cleanData.importance\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        0
+      ],
+      "id": "4b473fd2-f5ff-4b43-bb9d-6330dd04c31e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "sendTo": "=anikwenzekelly@gmail.com",
+        "subject": "=Daily Competitor & Market Report",
+        "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Priority: ${item.importance}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by CySafePath</small></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        192
+      ],
+      "id": "e3eb85c1-4ab2-4e78-ad42-916fc53515c6",
+      "name": "Send a message1",
+      "webhookId": "dc549ff2-e3a5-417a-91f8-6df60825a7da"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "71dd2c78-e857-4701-98da-45ae121e343b",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [\n  {\n    type: \"header\",\n    text: { type: \"plain_text\", text: \"🚀 Daily Competitor & Market Report\" }\n  },\n  { type: \"divider\" },\n];\n\nfor (const item of $json.data) {\n  blocks.push(\n    {\n      type: \"section\",\n      text: { type: \"mrkdwn\", text: `*${item.title}*\\n${item.summary}` },\n      accessory: {\n        type: \"button\",\n        text: { type: \"plain_text\", text: \"View Article\" },\n        url: item.link,\n      },\n    },\n    {\n      type: \"context\",\n      elements: [\n        { type: \"mrkdwn\", text: `Category: ${item.category} | Importance: ${item.importance}/5` }\n      ],\n    },\n    { type: \"divider\" }\n  );\n}\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        -160
+      ],
+      "id": "ada6ae4a-6c4d-433e-b276-99ef398de01c",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "96377b45-fa32-4ff2-8772-fddbf0883a2b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "RmmFUUGhKxvsHdp6GUqnH",
+  "tags": []
+}

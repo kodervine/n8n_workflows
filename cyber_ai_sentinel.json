@@ -1,5 +1,5 @@
 {
-  "name": "Cyber AI Sentinel",
+  "name": "cyber_ai_sentinel",
   "nodes": [
     {
       "parameters": {
@@ -66,10 +66,9 @@
           "mode": "list",
           "cachedResultName": "all-cysafepath"
         },
-        "messageType": "=block",
-        "text": "Daily Competitor & Market Report\n",
-        "blocksUi": "={{ \n  JSON.stringify(\n    ($json.data || []).reduce((blocks, item) => {\n      blocks.push(\n        {\n          \"type\": \"section\",\n          \"text\": {\n            \"type\": \"mrkdwn\",\n            \"text\": `*${item.title}*\\n${item.summary}`\n          },\n          \"accessory\": {\n            \"type\": \"button\",\n            \"text\": {\n              \"type\": \"plain_text\",\n              \"text\": \"View Article\"\n            },\n            \"url\": item.link\n          }\n        },\n        {\n          \"type\": \"context\",\n          \"elements\": [\n            {\n              \"type\": \"mrkdwn\",\n              \"text\": `*Category:* ${item.category}  |  *Importance:* ${item.importance}/5`\n            }\n          ]\n        },\n        {\n          \"type\": \"divider\"\n        }\n      );\n      return blocks;\n    }, [\n      {\n        \"type\": \"header\",\n        \"text\": {\n          \"type\": \"plain_text\",\n          \"text\": \"🚀 Daily Competitor & Market Report\"\n        }\n      },\n      {\n        \"type\": \"divider\"\n      }\n    ])\n  )\n}}\n",
-        "attachments": [],
+        "messageType": "block",
+        "blocksUi": "={{ $json.blocks }}",
+        "text": "={{ $json.blocks }}",
         "otherOptions": {
           "link_names": false,
           "mrkdwn": true
@@ -78,8 +77,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.4,
       "position": [
-        1328,
-        -192
+        1536,
+        -176
       ],
       "id": "f1d331dc-85e2-429b-a9c4-42bb58fb7018",
       "name": "Send a message",
@@ -391,6 +390,19 @@
           "name": "SMTP account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [\n  {\n    type: \"header\",\n    text: {\n      type: \"plain_text\",\n      text: \"🚀 Daily Competitor & Market Report\"\n    }\n  },\n  { type: \"divider\" }\n];\n\nfor (const item of $json.data || []) {\n  blocks.push(\n    {\n      type: \"section\",\n      text: {\n        type: \"mrkdwn\",\n        text: `*${item.title}*\\n${item.summary}`\n      },\n      accessory: {\n        type: \"button\",\n        text: { type: \"plain_text\", text: \"View Article\" },\n        url: item.link\n      }\n    },\n    {\n      type: \"context\",\n      elements: [\n        {\n          type: \"mrkdwn\",\n          text: `Category: ${item.category} | Importance: ${item.importance ?? \"N/A\"}/5`\n        }\n      ]\n    },\n    { type: \"divider\" }\n  );\n}\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        -176
+      ],
+      "id": "cc5cd1fc-15ac-43b7-abb9-43f0269663e9",
+      "name": "Code in JavaScript1"
     }
   ],
   "pinData": {},
@@ -430,23 +442,12 @@
     },
     "Send a message1": {
       "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Aggregate": {
       "main": [
         [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          },
           {
             "node": "Send a message1",
             "type": "main",
@@ -454,6 +455,11 @@
           },
           {
             "node": "Send email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
             "type": "main",
             "index": 0
           }
@@ -580,14 +586,27 @@
           }
         ]
       ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "be864bb7-0e4b-4a2f-99a6-ccc1efb26974",
+  "versionId": "d6912002-f72f-4695-9580-9d2252bc4d93",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"

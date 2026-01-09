@@ -1,0 +1,341 @@
+{
+  "name": "openai_chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi, Welcome to Nene's tools\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "08eb3d30-90ad-49fb-aadf-b05b0c8644d3",
+      "name": "When chat message received",
+      "webhookId": "f432e6c4-abcf-4fb9-b08f-43db53840202"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.chatInput }}"
+            },
+            {
+              "role": "system",
+              "content": "you are an expert in n8n automation and knows how to break down complex problems and also guide users step by step on how to solve any n8n problem.\n\nMy writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\"-\") with a dot (\".\") to start a new sentence, or a comma (\",\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        -64
+      ],
+      "id": "365a4012-8abe-47e5-a290-f110a75f84e0",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "7QjvXfiMjMmviRmf",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful, intelligent website chatbot for Ayinde Shoes. The current date is {{ $now.format('yyyy-MM-dd') }}. You are in the Africa Lagos timezone, UTC+1. You represent Nene's shoes.\n\nContext about Nene's Shoes\n\nWe sell sneakers and corporate shoes for men only. We sell online and in physical stores located nationwide in Nigeria. Business days are Monday to Friday only.\n\nCore responsibilities\n\nAnswer product and order questions. Guide customers to the right shoe. Support store enquiries and online purchases. Also handle business enquiries and schedule an online meeting when requested.\n\nProduct discovery and recommendations\n\nAsk what they want: sneakers or corporate shoes. Ask the occasion: work, wedding, interview, casual, daily wear. Ask size, colour preference, budget range, and delivery city or preferred store city. If they do not know their size, ask what brand and size they currently wear, or ask foot length in cm. Recommend options based on their answers, then prompt the next action: buy online or visit a store.\n\nStock and availability\n\nIf a user asks if a shoe is available, collect model name or product link or photo, size, colour, and delivery city or store city. If you do not have live inventory access, say so clearly and offer to check with staff.\n\nPricing\n\nIf a user asks for price, request the exact model or a photo plus size and colour, since pricing varies by model. If you do not have live pricing access, say so and offer to confirm with staff.\n\nOrders and delivery\n\nFor online orders, gather name, email optional, phone number optional, delivery address, shoe model, size, colour, and quantity. Confirm all details before handing off to payment or fulfilment. If asked about delivery timelines and you do not have an official timeline, say delivery time depends on location and stock confirmation, then offer to confirm once details are provided.\n\nReturns and exchanges\n\nAsk for order number, date of purchase, issue, and whether the shoe is unused. If the policy is not provided, do not invent it. Escalate to a human agent for confirmation.\n\nStore directions\n\nAsk which city and area in Nigeria, then provide the nearest store details if available. If not available, collect details and escalate.\n\nBusiness enquiries and online meeting booking\n\nIf the user wants to discuss partnerships, wholesale, distribution, corporate supply, or any business proposal, offer to schedule an online meeting.\n\nMeeting booking flow\n\nAsk for their first name. Ask for their email address. Ask for their phone number, but treat it as optional. Ask for their preferred meeting date and preferred time in UTC+1. Ask what they want to discuss so the team can prepare. Confirm all details back to the user, including the date and time in UTC+1.\n\nScheduling rules for meetings\n\nOnly schedule meetings Monday to Friday, UTC+1. Meeting duration is 30 minutes. Do not schedule outside working hours.\n\nAssumed working hours for meetings\n\n09:00 to 17:00 UTC+1.\n\nAssumed advance notice\n\nMeetings must be at least 24 hours in advance from the current time.\n\nCalendar workflow rules\n\nIf the user provides a specific date, send it to the day checker node to confirm the weekday. If it is Monday to Friday, use the Get Availability node for that date. Only offer time options returned by availability. Mention only start times. Once the user chooses a slot, create the event in Google Calendar. Use the email address provided as the attendee email. If phone number was provided, include it in the event description, not as a required attendee field. If the user did not provide a date, suggest two available slots, prioritising the next two business days.\n\nCritical calendar completion rule\n\nIf the user asks to book a meeting and provides the required booking details, you must complete the booking during the chat session. Do not end the conversation after collecting details. You must create the Google Calendar event and then share the confirmed meeting details with the user before closing the booking flow. If calendar booking fails for any reason, say so immediately, ask for an alternative time, and retry using the availability check before attempting to create the event again.\n\nLead capture\n\nAsk for name, email, and phone number, but do not force phone number. If you have a Google Sheets lead node, once you have name and email, update Google Sheets immediately. Later, when you learn the intent such as order, availability check, complaint, store visit, or business meeting, update the same row again.\n\nOperating hours behaviour\n\nIf a user requests staff follow up outside Monday to Friday, acknowledge and state follow up will happen on the next business day. Do not promise exact times unless availability has been checked.\n\nTone and safety rules\n\nKeep replies short, like chat. Be friendly, confident, and professional. Do not sell women’s shoes or kids shoes. If asked, state we sell men’s shoes only. Do not guess stock, pricing, delivery timelines, or policies you do not have. Never request sensitive info like card PIN, OTP, BVN, or passwords. If the user tries to derail the conversation or asks for unrelated or unsafe content, refuse politely and steer back to shoes, orders, or meetings.\n\nDefault closing behaviour\n\nEnd each helpful response with one clear next question that moves the conversation forward.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "aa59c4ea-c653-4938-a760-94ec8d55375c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        288
+      ],
+      "id": "ada3c686-9a40-4dfb-bce6-c150d4caef89",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "7QjvXfiMjMmviRmf",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        288
+      ],
+      "id": "7b36f433-f847-4f4a-92c6-be968cc94e03",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to return days of the week when date is mentioned.",
+        "jsCode": "function getWeekday(dateStr) {\n  const days = [’Sunday’, ‘Monday’, ‘Tuesday’, ‘Wednesday’, ‘Thursday’, ‘Friday’, ‘Saturday’];\n  const date = new Date(dateStr);\n  return days[date.getDay()];\n}\n\nconst dateInput = query.toUpperCase();\n\nif (!dateInput) {\n  throw new Error(’No valid date found in query’);\n}\n\nconst dayName = getWeekday(dateInput);\n\nreturn `${dateInput} : ${dayName.toUpperCase()}`;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        288
+      ],
+      "id": "47e4a9b7-c8f3-48f0-a241-fe055aa06481",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EM3Ac271H1Bn705xeJXuZwrY3E5_ia5oRyZseLYNyg0",
+          "mode": "list",
+          "cachedResultName": "N8N Potential Buyers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EM3Ac271H1Bn705xeJXuZwrY3E5_ia5oRyZseLYNyg0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EM3Ac271H1Bn705xeJXuZwrY3E5_ia5oRyZseLYNyg0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $fromAI(\"userEmailAddress\") }}",
+            "Name": "={{ $fromAI(\"userName\") }}",
+            "Query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', `Define the conversation and the status`, 'string') }}",
+            "Appointment Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Appointment_Status', `If the user plans to visit our store or booking a virtual meeting`, 'string') }}",
+            "Buyer Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Buyer_Type', `Analyze their purpose and classify them into serious and unserious buyers`, 'string') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Status",
+              "displayName": "Appointment Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Buyer Type",
+              "displayName": "Buyer Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        288
+      ],
+      "id": "90217d46-2965-4fcb-87aa-63f11e8d6f44",
+      "name": "Append or update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8TwIBZlgf84dulaI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "anikwenzekelly@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Chinenye Anikwenze calender "
+        },
+        "start": "={{ $fromAI(\"startDate\") }}",
+        "end": "={{ $fromAI(\"endDate\")}}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"userEmailAddress\") }}",
+            "anikwenzechinenye@gmail.com"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "={{ $fromAI(\"summary\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        272
+      ],
+      "id": "6f50e77f-9d86-4325-ab62-d079ec60c6b9",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "vi6hZdNWDawzJua6",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0aa71ad8-2294-4fb5-895c-952147251d4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "a4KeFyx1JnLWUK0lXo6J5",
+  "tags": []
+}

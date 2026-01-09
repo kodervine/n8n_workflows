@@ -1,0 +1,593 @@
+{
+  "name": "content-to-commerce-engine",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "fb9d2a97-bcd6-4d65-9dc9-8a08cd7188fe",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Act as a Senior B2B Marketing Manager. Based on this news, create a LinkedIn Headline (max 70 chars) and a Reddit Body (max 300 chars). Output ONLY as valid JSON"
+            },
+            {
+              "content": "My writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \\\"By\\\" or \\\"In conclusion\\\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\\\"-\\\") with a dot (\\\".\\\") to start a new sentence, or a comma (\\\",\\\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "91afa88d-b418-498d-bd63-b2f8b888dfba",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wBKty3a8SBjJTItJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.content.parts[0].text.replace(/```json|```/g, \"\");\n  const data = JSON.parse(raw);\n  let score = 10;\n  if (data.linkedin_headline.length > 70) score -= 5;\n  return { json: { ...data, quality_score: score, status: score >= 8 ? \"PASS\" : \"FAIL\" } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "29b471a4-7ebf-4481-a1a7-dcecb684c335",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e2967f34-7329-40ab-b8ae-22587ef46aa4",
+              "leftValue": "={{ $json.quality_score }}",
+              "rightValue": 8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "8bd48787-ce45-4a77-8053-87d8f45e9f51",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM",
+          "mode": "list",
+          "cachedResultName": "CysafePath Ad Approval",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Body": "={{ $json.reddit_body }}",
+            "Headline": "={{ $json.linkedin_headline }}",
+            "Quality Score": "={{ $json.quality_score }}",
+            "Link": "={{ $('Remove Duplicates').item.json.link }}"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Headline",
+              "displayName": "Headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Body",
+              "displayName": "Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quality Score",
+              "displayName": "Quality Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -160
+      ],
+      "id": "d024af1b-5234-4ed5-8ee2-d023cb6d50a4",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8TwIBZlgf84dulaI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A77UW7DK8",
+          "mode": "list",
+          "cachedResultName": "ad-approval"
+        },
+        "messageType": "block",
+        "blocksUi": "={\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"header\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\"text\": \"New Ad Content Generated\",\n\t\t\t\t\"emoji\": true\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"fields\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Status:*\\n {{ $json.status }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Quality Score:*\\n⭐ {{ $json.quality_score }}/10\"\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*🔗 LinkedIn Headline:*\\n{{ $json.linkedin_headline }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Body:*\\n{{ $json.reddit_body }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"context\",\n\t\t\t\"elements\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"📍 _Created by CySafePath Ad Factory Engine_\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+        "text": "={{ \"New ad content has been generated.\" }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1184,
+        176
+      ],
+      "id": "7e3b559f-2b4f-45d4-8541-8f7a9d581247",
+      "name": "Send a message",
+      "webhookId": "7aedd378-ae88-421f-a01d-6ae2460c75e8",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "5WoWDHXvSJ70QpB1",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://www.cisa.gov/cybersecurity-advisories/all.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -128
+      ],
+      "id": "8bc01521-6ebe-4c3d-89cc-4bbd38f16fb0",
+      "name": "CISA RSS Feed"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://feeds.feedburner.com/TheHackersNews"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        0
+      ],
+      "id": "328fb3ac-d814-4dea-9bef-b2407d3b0229",
+      "name": "Hacker News"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://www.bleepingcomputer.com/feed/"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        144
+      ],
+      "id": "eb8c13e3-26f6-4aa1-acf2-fec2d04f54e7",
+      "name": "Bleeping Computer"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://krebsonsecurity.com/feed/"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        288
+      ],
+      "id": "5f97316e-d338-43f6-ad44-1d5b47b85d39",
+      "name": "Krebs on Security"
+    },
+    {
+      "parameters": {
+        "url": "https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -544,
+        0
+      ],
+      "id": "1d1174a1-b869-46d1-b08a-cbe75d63fd77",
+      "name": "NVD NIST CVE"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.darkreading.com/rss.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -272
+      ],
+      "id": "a1f388ea-21d7-461f-b563-6190a8f5e6ff",
+      "name": "Dark Reading"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://unit42.paloaltonetworks.com/feed/"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -144
+      ],
+      "id": "efb53059-2ad1-46c7-8f0f-fd461bd65200",
+      "name": "Unit 42 Apollo"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://threatpost.com/feed/"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -272
+      ],
+      "id": "efb737ab-60a1-4338-9aae-165eb52208a4",
+      "name": "ThreatPost"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://isc.sans.edu/rssfeed.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        160
+      ],
+      "id": "b2471156-cd6d-4461-8756-bd21f0610012",
+      "name": "SANS Internet Storm Center"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://www.zdnet.com/topic/security/rss.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        304
+      ],
+      "id": "174b2b70-1990-4caa-85ce-a6f6d75a136b",
+      "name": "ZD Net"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dark Reading": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CISA RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ThreatPost": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unit 42 Apollo": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVD NIST CVE": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hacker News": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bleeping Computer": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Krebs on Security": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SANS Internet Storm Center": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ZD Net": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f2003811-64a1-4b31-99d0-8fa903d8bf44",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "2C5b0pfQomeWqQ78GpcrJ",
+  "tags": []
+}

@@ -1,0 +1,111 @@
+{
+  "name": "scholars_africa",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -16
+      ],
+      "id": "07dd120d-5720-4777-b194-fe1ceb646a9c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "ticketId": "200812"
+      },
+      "type": "n8n-nodes-base.freshdesk",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -16
+      ],
+      "id": "ea216ddc-40ff-4234-b5bd-480f6cbac167",
+      "name": "Get a ticket",
+      "credentials": {
+        "freshdeskApi": {
+          "id": "R1wgwU54Tg1VHHM9",
+          "name": "Freshdesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a coach for Sweden masters applications and the swedish institute scholarship. Analyze the ticket description.\n\nIdentify if the user is asking about the Swedish Institute (SI) Scholarship or University Admissions.\n\nProvide a helpful response in 5 sentences max.\n\nIf the request is ambiguous or you are unsure, return exactly: \"CONFIDENCE_LOW\".\n\nIf sure, format your response exactly like this: Confidence: [0-100] Response: [Your message]"
+            },
+            {
+              "content": "My writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\"-\") with a dot (\".\") to start a new sentence, or a comma (\",\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI.",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "bd25d399-1edc-4dba-b2d5-bce4cf85c5a6",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wBKty3a8SBjJTItJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get a ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a ticket": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "8acf92b8-bd88-4941-90e0-9dad03d4ec81",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "rOPNYnOfxNxMycIGM9dAb",
+  "tags": []
+}

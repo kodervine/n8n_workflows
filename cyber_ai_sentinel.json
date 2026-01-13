@@ -12,7 +12,7 @@
         "messages": {
           "values": [
             {
-              "content": "=\"You are a Senior Tier 3 SOC Analyst. Analyze the following news items.\n\nExtract the Affected Software/Hardware.\n\nDetermine if it is a Vulnerability (CVE), Data Breach, or General News.\n\nAssign a Severity Score (1-5).\n\nWrite a 1-sentence 'Mitigation Step' for a sysadmin.\n\nReturn the output ONLY as a JSON object with these keys: title, summary, category, severity, mitigation.\""
+              "content": "=\"You are a Senior Tier 3 SOC Analyst. Analyze the following news items.\n{{ $('Code in JavaScript2').item.json.url }}\n{{ $('RSS Read').item.json.content }}\nExtract the Affected Software/Hardware.\n\nDetermine if it is a Vulnerability (CVE), Data Breach, or General News.\n\nAssign a Severity Score (1-5).\n\nWrite a 1-sentence 'Mitigation Step' for a sysadmin.\n\nReturn the output ONLY as a JSON object with these keys: title, summary, category, severity, mitigation.\""
             },
             {
               "content": "My writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\"-\") with a dot (\".\") to start a new sentence, or a comma (\",\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI.",
@@ -27,14 +27,14 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.1,
       "position": [
-        416,
-        0
+        16,
+        256
       ],
-      "id": "02e324b0-e844-42c0-9bf2-67a6b8cf7797",
+      "id": "4ba257f0-df15-45a8-bd66-a4ef5753e184",
       "name": "Message a model",
       "credentials": {
         "googlePalmApi": {
-          "id": "wBKty3a8SBjJTItJ",
+          "id": "iDUFqtK7ModvDnDf",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -50,15 +50,14 @@
       "type": "n8n-nodes-base.removeDuplicates",
       "typeVersion": 2,
       "position": [
-        208,
-        0
+        -432,
+        256
       ],
-      "id": "62a1ac0d-bb2b-48aa-ad66-00e63ac0d16b",
+      "id": "d2c7120c-3ae7-4dd5-bef0-53b9bd885d16",
       "name": "Remove Duplicates"
     },
     {
       "parameters": {
-        "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
@@ -68,7 +67,7 @@
         },
         "messageType": "block",
         "blocksUi": "={{ $json.blocks }}",
-        "text": "={{ $json.blocks }}",
+        "text": "New update sent",
         "otherOptions": {
           "link_names": false,
           "mrkdwn": true
@@ -77,15 +76,15 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.4,
       "position": [
-        1536,
-        -176
+        1264,
+        64
       ],
-      "id": "f1d331dc-85e2-429b-a9c4-42bb58fb7018",
+      "id": "a8b58e50-ceab-4fac-923b-0f37d485da77",
       "name": "Send a message",
       "webhookId": "ab7166bf-6348-4d27-be42-df9b2d7ac01c",
       "credentials": {
-        "slackOAuth2Api": {
-          "id": "5WoWDHXvSJ70QpB1",
+        "slackApi": {
+          "id": "DYl7V4oTzOId2jt4",
           "name": "Slack account"
         }
       }
@@ -97,31 +96,31 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
-        0
+        368,
+        256
       ],
-      "id": "91c07792-9a75-4e12-afea-1fbbfce5b6ee",
+      "id": "176ed596-8b14-4a5c-94a4-e5c8c219b342",
       "name": "Code in JavaScript"
     },
     {
       "parameters": {
         "sendTo": "=anikwenzekelly@gmail.com",
-        "subject": "=Daily Competitor & Market Report",
+        "subject": "=Daily Market Report",
         "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Severity: ${item.severity}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by CySafePath</small></p>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1328,
-        192
+        1040,
+        448
       ],
-      "id": "743b24db-8ec4-49e9-88a6-18c7cfca92aa",
+      "id": "ba1b10df-a0ac-47ca-9c1f-943a619b12ef",
       "name": "Send a message1",
       "webhookId": "ff63b8f8-ac0c-4c36-a8f1-8220ff412e9e",
       "credentials": {
         "gmailOAuth2": {
-          "id": "dA9LTnkhHifKhbxj",
+          "id": "6DkFpa5uvVgIQTXZ",
           "name": "Gmail account"
         }
       }
@@ -134,205 +133,11 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        1104,
-        0
+        816,
+        256
       ],
-      "id": "ad32dc08-c738-44d8-ad79-ad6eb2bacfbe",
+      "id": "e20fabf1-f66b-48e1-9102-1773dd3ebf93",
       "name": "Aggregate"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://www.cisa.gov/cybersecurity-advisories/all.xml"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        -128
-      ],
-      "id": "bc02166b-0cfe-4011-bedb-d39dbf47d28c",
-      "name": "CISA RSS Feed"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://feeds.feedburner.com/TheHackersNews"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "99d86f1d-735e-4591-be6b-d4801143d21c",
-      "name": "Hacker News"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://www.bleepingcomputer.com/feed/"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        144
-      ],
-      "id": "4384ccea-ee6b-40ee-b257-db762aa8f967",
-      "name": "Bleeping Computer"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "feedUrl": "https://krebsonsecurity.com/feed/"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        288
-      ],
-      "id": "e6c867d9-79c9-4e55-b926-dc909b828601",
-      "name": "Krebs on Security"
-    },
-    {
-      "parameters": {
-        "url": "https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -192,
-        0
-      ],
-      "id": "2a613ec6-2502-4d7e-a0ee-4aad261faf54",
-      "name": "NVD NIST CVE"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "feedUrl": "https://www.darkreading.com/rss.xml"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        -272
-      ],
-      "id": "c2ed6209-4a46-4aa3-8381-b55fc69b51af",
-      "name": "Dark Reading"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://unit42.paloaltonetworks.com/feed/"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        -144
-      ],
-      "id": "65b75383-b4d4-4be6-b978-d41d80797b8d",
-      "name": "Unit 42 Apollo"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://threatpost.com/feed/"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        -272
-      ],
-      "id": "68b1855d-ccb6-4b48-883c-0ee3d0c6c3ee",
-      "name": "ThreatPost"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://isc.sans.edu/rssfeed.xml"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        160
-      ],
-      "id": "ccd743da-5685-4768-b3ff-055781410794",
-      "name": "SANS Internet Storm Center"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour"
-            }
-          ]
-        },
-        "feedUrl": "https://www.zdnet.com/topic/security/rss.xml"
-      },
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        304
-      ],
-      "id": "9e30edea-32ba-40fa-a835-18bd45cc559d",
-      "name": "ZD Net"
     },
     {
       "parameters": {
@@ -361,10 +166,10 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        912,
-        0
+        592,
+        256
       ],
-      "id": "c3857228-3b3f-4efb-9fde-6063c09e91da",
+      "id": "bca52d53-a615-4b2b-8847-ef10c24094b6",
       "name": "Filter"
     },
     {
@@ -378,15 +183,15 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1328,
-        0
+        1040,
+        256
       ],
-      "id": "3fee2d8a-faa9-49af-85d2-0e73447896e6",
+      "id": "be7c5c42-3744-4df7-8f07-c22da7eeb6cc",
       "name": "Send email",
       "webhookId": "3f61162a-385b-4966-a949-de97a93b5ba9",
       "credentials": {
         "smtp": {
-          "id": "J5C0SU4QyWHqv9aM",
+          "id": "TljcLHj6D9vJJcOz",
           "name": "SMTP account"
         }
       }
@@ -398,11 +203,116 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1328,
-        -176
+        1040,
+        64
       ],
-      "id": "cc5cd1fc-15ac-43b7-abb9-43f0269663e9",
+      "id": "ee5d6085-188b-4076-a2f9-548c88252fa9",
       "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1552,
+        256
+      ],
+      "id": "25f77ff5-ec62-4f4a-ade6-0dd7c981282e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rssData = {\n  \"CISA Gov\": \"https://www.cisa.gov/cybersecurity-advisories/all.xml\",\n  \"HackerNews\": \"https://feeds.feedburner.com/TheHackersNews\",\n  \"Bleeping Computer\": \"https://www.bleepingcomputer.com/feed/\",\n};\n\n// Map the object into an array of items n8n can loop through\nreturn Object.entries(rssData).map(([name, url]) => {\n  return {\n   name: name,\n  url: url\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        256
+      ],
+      "id": "1bc6b446-35a5-4603-b6d5-3c815ce3534a",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1104,
+        256
+      ],
+      "id": "0fb22038-b73a-48f8-8b7d-454e268e0d76",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        256
+      ],
+      "id": "e232ebf9-14f0-4d68-957c-de3d863e9416"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "customFields": ""
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -656,
+        256
+      ],
+      "id": "c0d8ac57-5f81-49f0-8ce8-13b9019762c4",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87a3bb16-991b-476d-9348-721048e4572b",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus({ days: 1 }) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        256
+      ],
+      "id": "8034d3ae-9e64-43fb-829e-0d3b87eeec66",
+      "name": "Filter by publication date to remove previous dates"
     }
   ],
   "pinData": {},
@@ -411,7 +321,7 @@
       "main": [
         [
           {
-            "node": "Message a model",
+            "node": "Filter by publication date to remove previous dates",
             "type": "main",
             "index": 0
           }
@@ -440,11 +350,6 @@
         ]
       ]
     },
-    "Send a message1": {
-      "main": [
-        []
-      ]
-    },
     "Aggregate": {
       "main": [
         [
@@ -460,116 +365,6 @@
           },
           {
             "node": "Code in JavaScript1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "CISA RSS Feed": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Bleeping Computer": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Hacker News": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Krebs on Security": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "NVD NIST CVE": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Dark Reading": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Unit 42 Apollo": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "ThreatPost": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "SANS Internet Storm Center": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "ZD Net": {
-      "main": [
-        [
-          {
-            "node": "Remove Duplicates",
             "type": "main",
             "index": 0
           }
@@ -597,20 +392,96 @@
           }
         ]
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by publication date to remove previous dates": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": false,
     "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "lpYUTXS2A2DJZuQ6XQ4XY",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "timeSavedPerExecution": 20
   },
-  "versionId": "d6912002-f72f-4695-9580-9d2252bc4d93",
+  "versionId": "9c9c0ae9-56d5-42bf-aee5-8a94ac4ceadb",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+    "instanceId": "65efa035248b15e3b183bef7d989afbe6e7286ab0b8a4194900ab11e005c5805"
   },
-  "id": "OdimFhbIhScNziUr",
+  "id": "1SVPzWZoBIozaH3DjeaLm",
   "tags": []
 }

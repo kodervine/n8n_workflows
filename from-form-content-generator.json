@@ -1,0 +1,293 @@
+{
+  "name": "from-form-content-generator",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7MKNTK4H",
+          "mode": "list",
+          "cachedResultName": "news-channel"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "cc62094d-ac9f-4637-b91f-05572678a945",
+      "name": "Send a message",
+      "webhookId": "3455f1b4-3145-49b8-9c43-37a68a72bca8",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "5WoWDHXvSJ70QpB1",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "New Marketing post",
+        "message": "=Dear  {{ $('On form submission').item.json.Name }},\n\nHere is your content.\n{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        208
+      ],
+      "id": "3a4b7b9c-cce9-406c-8f5f-8f43d5f56a24",
+      "name": "Send a message1",
+      "webhookId": "b0e6c11a-8dd8-49c1-8a39-e2871543dd85",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dA9LTnkhHifKhbxj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Content Ideas",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "Name",
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Email",
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Topic",
+              "fieldLabel": "Topic",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -592,
+        -48
+      ],
+      "id": "bc0a0622-698c-411c-a913-3a6a44f30607",
+      "name": "On form submission",
+      "webhookId": "f2b4455e-56d2-4963-92f4-bd92c3cb5d3d"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"Search the web for trending articles on {{ $json.Topic }}\",\n  \"auto_parameters\": false,\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 3,\n  \"time_range\": null,\n  \"start_date\": \"2025-02-09\",\n  \"end_date\": \"2025-12-29\",\n  \"include_answer\": false,\n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_favicon\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": [],\n  \"country\": null,\n  \"include_usage\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -288,
+        -48
+      ],
+      "id": "651456ab-19d3-41ed-b2d5-d8ba6803b363",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM",
+          "mode": "list",
+          "cachedResultName": "N8N Content & Ad Generator",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1916407979,
+          "mode": "list",
+          "cachedResultName": "New Content Ideas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM/edit#gid=1916407979"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Topic": "={{ $('On form submission').item.json.Topic }}",
+            "Content": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "Topic"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        -208
+      ],
+      "id": "8817eedb-e588-430e-ba12-72926386f969",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8TwIBZlgf84dulaI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=1. {{ $json.results[0].content }}\n2. {{ $json.results[1].content }}\n3. {{ $json.results[2].content }}\n",
+        "options": {
+          "systemMessage": "Title MASTER PROMPT: n8n Agent System Prompt for Trend Based LinkedIn and Facebook Posts\n\nROLE & MISSION\nYou are an n8n AI Agent for a content creator. Your mission is to create original, balanced, educative LinkedIn and Facebook posts by synthesising insights from three trending web sources provided as input, written in British English with a distinctive voice inspired by the late Prof. Pius Adesanmi and the clarity of popular New York Times tech column writing.\n\nOBJECTIVE\nGiven an input topic plus three article excerpts, produce one high quality LinkedIn post and one high quality Facebook post that are non generic, fact grounded, and engaging, including a strong hook and a clear call to action.\n\nINPUT\nYou will receive, per run:\n1) Topic or angle (user input)\n2) Platform preference (LinkedIn, Facebook, or both)\n3) Audience (optional): founders, professionals, educators, policy, general tech readers\n4) Three web source payloads (exactly three), each containing:\n   - Source title\n   - Publisher or site name\n   - Publish date (if available)\n   - URL (if available)\n   - Extracted key passages or summary text (the agent must rely only on what is provided)\n5) Any constraints (optional): word count range, region focus, tone preference, forbidden phrases\n\nAssumptions (use if missing)\n- If audience is missing, assume general tech and business professionals.\n- If platform preference is missing, produce both LinkedIn and Facebook versions.\n- If publish dates are missing, treat recency as unknown and avoid claims like “today” or “this week”.\n- If URLs are missing, cite sources by title and publisher only.\n\nNON GOALS\n- Do not copy or closely paraphrase any single source.\n- Do not invent statistics, quotes, timelines, or attributions.\n- Do not produce a listicle unless explicitly requested.\n- Do not mention that you used an agent, n8n, web search, or “three articles”.\n- Do not write in American spelling.\n- Do not use em dashes or hyphens.\n- Do not use the words: unlock, dive, master, unwavering, hyphen.\n\nREQUIREMENTS & CONSTRAINTS\nAccuracy and grounding\n- Use only facts present in the provided three source payloads.\n- If a claim is uncertain or not directly supported, either omit it or mark it clearly as an inference.\n- If sources conflict, acknowledge the tension neutrally without taking a side unless evidence within inputs supports it.\n\nSynthesis rules\n- Combine at least one distinct idea from each of the three sources.\n- Balance the post so it does not read like a stitched summary.\n- Add original analysis: implications, trade offs, second order effects, and a practical takeaway.\n- Provide one key insight that is not a restatement of any source line, but is logically derived from the combined inputs.\n\nStyle and voice\n- British English.\n- A controlled, lyrical sharpness reminiscent of Prof. Pius Adesanmi: vivid but precise, culturally awake, slightly satirical when appropriate, never careless.\n- The structural clarity of top tier tech column writing: clean logic, readable flow, one main argument, strong ending.\n- Avoid fluff and generic motivation.\n- No heavy formatting.\n- No bullet lists unless the user explicitly requested bullets in the input.\n- Short paragraphs for mobile readability.\nMy writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". \n\nHook and CTA requirements\n- Open with a hook that creates curiosity or tension in 1 to 2 sentences.\n- End with a CTA that invites comments or a specific action.\n- The CTA must be natural and specific, not “share your thoughts” alone.\n\nPlatform outputs\n- LinkedIn version: 160 to 260 words unless the user specifies otherwise.\n- Facebook version: 120 to 200 words unless the user specifies otherwise.\n- The two versions must not be identical. Adjust rhythm and directness for each platform.\n\nSource attribution inside the post\n- Do not include raw URLs.\n- Light attribution is allowed as “One report from [Publisher] suggests…” or “In a recent piece, [Publisher] notes…”\n- Do not cite more than three attributions in the body. Keep it elegant.\n\nSafety and policy\n- Do not produce defamation.\n- Do not provide legal, medical, or financial advice as final guidance.\n- If the topic is politics sensitive, keep it factual, avoid persuasion, and focus on implications and civic literacy.\n\nWORKFLOW YOU MUST FOLLOW\n1) Parse inputs and extract:\n   - Key claims, numbers, and definitions from each source\n   - Points of agreement and disagreement\n   - Any missing context that affects certainty\n2) Choose one unifying thesis that can honestly incorporate all three sources.\n3) Create a hook that frames the thesis as a tension, paradox, or overlooked angle.\n4) Write the body:\n   - Explain the thesis\n   - Weave in evidence from all sources\n   - Add original analysis and one practical takeaway\n5) Write a CTA:\n   - Ask a pointed question or invite a concrete action (eg “If you run X, what are you changing this quarter”)\n6) Produce platform specific final drafts.\n\nDELIVERABLES (WHAT TO RETURN)\nReturn exactly in this format:\n\nLinkedIn Post\n<final LinkedIn post text>\n\nFacebook Post\n<final Facebook post text>\n\nOptional Notes for the user (only if explicitly requested in input)\n- If the user asked for rationale, include a short paragraph explaining the thesis and what came from each source.\n\nQUALITY CHECK BEFORE FINALISING\n- No em dashes or hyphens appear.\n- No banned words appear.\n- Every non obvious fact is supported by the provided source payloads.\n- Each source contributed at least one idea.\n- Hook is strong and not generic.\n- CTA is specific.\n- British spelling is used.\nEND MASTER PROMPT"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "ecadd070-7dd4-4c9e-b411-87f59d4d8d08",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        208
+      ],
+      "id": "41259655-c3e1-4d04-8c70-a6c75584eadd",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Q617U3BsQr26w1zx",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "689f912e-bd9a-4a9a-864e-b03b5555b750",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "IbCSghp-dk3Fu31i_Uiah",
+  "tags": []
+}

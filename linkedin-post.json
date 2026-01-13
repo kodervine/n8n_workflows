@@ -1,0 +1,262 @@
+{
+  "name": "linkedin-post",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Linkedin Post",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "Email",
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Topic",
+              "fieldLabel": "Topic",
+              "requiredField": true
+            },
+            {
+              "fieldName": "TargetAudience",
+              "fieldLabel": "Target Audience"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "85655670-6599-442a-80cc-68f86ec118eb",
+      "name": "On form submission",
+      "webhookId": "adc7e2f1-1689-4f5a-aeb2-742faed2dc91"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        232,
+        224
+      ],
+      "id": "6c338e26-80ac-47d7-bb30-4819beadf274",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Q617U3BsQr26w1zx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer <token>"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"Search the web for top article on {{ $json.Topic }} and this should be suitable for {{ $json.TargetAudience }}\",\n  \"auto_parameters\": false,\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 1,\n  \"time_range\": null,\n  \"start_date\": \"2025-02-09\",\n  \"end_date\": \"2025-12-29\",\n  \"include_answer\": false,\n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_favicon\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": [],\n  \"country\": null,\n  \"include_usage\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        360,
+        224
+      ],
+      "id": "ffef6920-e633-405c-b90a-a9e884715f1b",
+      "name": "Tavilly Post"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image (Nano Banana)"
+        },
+        "prompt": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        0
+      ],
+      "id": "7bb5f5fd-a19d-4c49-9570-38855574c430",
+      "name": "Generate an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wBKty3a8SBjJTItJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topic:  {{ $json.Topic }}\nTarget Audience: {{ $json.TargetAudience }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant. iMy writing style is clear and educational. I present information in a structured and organized manner, making it easy for the reader to understand. My tone is instructive, and I provide detailed explanations to ensure that readers understand the subject matter. My writing style is simple, direct, straightforward, and uncomplicated. I never make use of conflated or ambiguous words. I try to make my explanations relatable. I also use casual phrases.\nI want you to write with greater burstiness, with some longer or complex sentences alongside shorter ones. Make the vocabulary as simple as possible and use the simplest grammar structure. Have a good amount of perplexity. Don't start a sentence with \"By\" or \"In conclusion\". Be highly organized. Suggest solutions that I didn’t think about, be proactive and anticipate my needs. Systematically replace em-dashes (\"-\") with a dot (\".\") to start a new sentence, or a comma (\",\") to continue the sentence. Don't give useless analogies. Mix up variety of words length. When in doubt, use simplest word equivalent. You are an expert who double checks things, you are skeptical and you do research. Mistakes erode my trust, so be accurate and thorough. Provide detailed explanations, I’m comfortable with lots of detail. No moral lectures. Discuss safety only when it's crucial and non-obvious. If your content policy is an issue, provide the closest acceptable response and explain the content policy issue. Cite sources whenever possible, and include URLs if possible. List URLs at the end of your response (where applicable), not inline. No need to mention your knowledge cutoff. Don't disclose you're an AI."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "21107c06-3985-4b25-8d0a-7b3523240e90",
+      "name": "Linkedin Post Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "To create high-quality LinkedIn visuals using an AI agent in n8n, you need a system prompt that turns raw ideas into precise image generation instructions. This system prompt acts as the \"brain\" for your AI node, ensuring it always outputs a prompt that DALL-E or Midjourney can understand.\n\nThe System Prompt for n8n\nCopy this text into the System Message or Instructions field of your AI node in n8n.\n\nYou are a professional graphic design consultant specializing in LinkedIn content. Your job is to transform a user's topic or text into a highly detailed image generation prompt.\n\nGoal: Create a visual that stops the scroll and looks professional.\n\nRules for Output:\n\nFormat: Focus on 1:1 or 4:5 aspect ratios.\n\nStyle: Use \"Corporate Minimalist,\" \"3D Isometric,\" or \"Flat Vector Illustration.\"\n\nText: Instruct the generator to avoid long words. Tell it to leave \"Copy Space\" for manual text overlay.\n\nComposition: Use terms like \"rule of thirds,\" \"depth of field,\" and \"central focal point.\"\n\nColors: Default to professional tones like deep navy, slate grey, and one vibrant accent color.\n\nOutput Structure: Provide only the final image prompt. Do not add any conversational filler. Start the prompt immediately."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        576,
+        0
+      ],
+      "id": "c71a6f30-87d1-4f5e-84e5-fbed26cf8c9f",
+      "name": "Linkedin Image Prompt Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "anikwenzekelly@gmail.com",
+        "subject": "Your post for today",
+        "message": "={{ $('Linkedin Post Agent').item.json.output }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "80fa2de9-8269-4852-9fa7-fa200375af5d",
+      "name": "Send a message",
+      "webhookId": "b1f4bcf4-f1d6-44f4-8274-b0e7209eb4de",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dA9LTnkhHifKhbxj",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Linkedin Post Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Linkedin Post Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Linkedin Image Prompt Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavilly Post": {
+      "ai_tool": [
+        [
+          {
+            "node": "Linkedin Post Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin Post Agent": {
+      "main": [
+        [
+          {
+            "node": "Linkedin Image Prompt Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin Image Prompt Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b29d07c2-e2e7-4e7b-8c37-e431f034dac5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2045fe4f88af4e1a4232fbb809e5a89e748139b5866fd83276981ee546743098"
+  },
+  "id": "99oDqriZnOmQUr2Jqcx2j",
+  "tags": []
+}

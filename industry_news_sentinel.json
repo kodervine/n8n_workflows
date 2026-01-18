@@ -84,7 +84,7 @@
           "__rl": true,
           "value": "C0A7MKG2VT3",
           "mode": "list",
-          "cachedResultName": "all-cysafepath"
+          "cachedResultName": "all-YourDomain"
         },
         "messageType": "block",
         "blocksUi": "={{ $json.blocks }}",
@@ -126,9 +126,9 @@
     {
       "parameters": {
         "authentication": "serviceAccount",
-        "sendTo": "=anikwenzekelly@gmail.com",
+        "sendTo": "=youremail@mail.com",
         "subject": "=Daily Competitor & Market Report",
-        "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Priority: ${item.importance}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by CySafePath</small></p>",
+        "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Priority: ${item.importance}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by YourDomain</small></p>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",

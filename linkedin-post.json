@@ -145,14 +145,12 @@
     },
     {
       "parameters": {
-        "sendTo": "anikwenzekelly@gmail.com",
+        "sendTo": "youremail@mail.com",
         "subject": "Your post for today",
         "message": "={{ $('Linkedin Post Agent').item.json.output }}",
         "options": {
           "attachmentsUi": {
-            "attachmentsBinary": [
-              {}
-            ]
+            "attachmentsBinary": [{}]
           }
         }
       },

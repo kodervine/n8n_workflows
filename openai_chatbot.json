@@ -222,7 +222,7 @@
       "parameters": {
         "calendar": {
           "__rl": true,
-          "value": "anikwenzekelly@gmail.com",
+          "value": "youremail@mail.com",
           "mode": "list",
           "cachedResultName": "Chinenye Anikwenze calender "
         },
@@ -231,7 +231,7 @@
         "additionalFields": {
           "attendees": [
             "={{ $fromAI(\"userEmailAddress\") }}",
-            "anikwenzechinenye@gmail.com"
+            "youremail@mail.com"
           ],
           "conferenceDataUi": {
             "conferenceDataValues": {

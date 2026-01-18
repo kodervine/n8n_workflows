@@ -107,7 +107,7 @@
           "__rl": true,
           "value": "1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM",
           "mode": "list",
-          "cachedResultName": "CysafePath Ad Approval",
+          "cachedResultName": "YourDomain Ad Approval",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RfPH7d_j-J90sHeP0M1X3fa7HrMnAJjG0tArilvtPkM/edit?usp=drivesdk"
         },
         "sheetName": {
@@ -201,7 +201,7 @@
           "cachedResultName": "ad-approval"
         },
         "messageType": "block",
-        "blocksUi": "={\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"header\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\"text\": \"New Ad Content Generated\",\n\t\t\t\t\"emoji\": true\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"fields\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Status:*\\n {{ $json.status }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Quality Score:*\\n⭐ {{ $json.quality_score }}/10\"\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*🔗 LinkedIn Headline:*\\n{{ $json.linkedin_headline }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Body:*\\n{{ $json.reddit_body }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"context\",\n\t\t\t\"elements\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"📍 _Created by CySafePath Ad Factory Engine_\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+        "blocksUi": "={\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"header\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\"text\": \"New Ad Content Generated\",\n\t\t\t\t\"emoji\": true\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"fields\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Status:*\\n {{ $json.status }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Quality Score:*\\n⭐ {{ $json.quality_score }}/10\"\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*🔗 LinkedIn Headline:*\\n{{ $json.linkedin_headline }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Body:*\\n{{ $json.reddit_body }}\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"context\",\n\t\t\t\"elements\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"📍 _Created by YourDomain Ad Factory Engine_\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
         "text": "={{ \"New ad content has been generated.\" }}",
         "otherOptions": {}
       },

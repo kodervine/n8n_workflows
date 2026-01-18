@@ -1,0 +1,1217 @@
+{
+  "name": "payment-webhook-and-reporting",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paystack-success",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -496,
+        -96
+      ],
+      "id": "4ae6e78a-86cc-4725-93d7-4837fe13e418",
+      "name": "Webhook",
+      "webhookId": "e14aa4ab-9bbd-420b-a6e6-68085422c277"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        -192
+      ],
+      "id": "17997548-6139-4877-9f10-331832d62ebe",
+      "name": "Wait",
+      "webhookId": "50ea6ddf-0a54-4022-88cd-f26ed21e0a23"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "997e059d-752b-4246-9960-df95aa2d3407",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -96
+      ],
+      "id": "1f46194c-c3a5-4855-87f1-161406277902",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a5749a6c-5547-471a-b4d2-8d64d77beeeb",
+              "leftValue": "={{ $('Webhook').item.json.body.event }}",
+              "rightValue": "charge.failed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "46a89adb-076a-4f17-be2c-a587635c65e0",
+      "name": "If Event is Charge Failed"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "Need help with your payment?",
+        "message": "=<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #f2dede; border-radius: 8px; overflow: hidden;\">\n    <div style=\"background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 1px solid #eeeeee;\">\n        <h1 style=\"color: #333333; margin: 0; font-size: 22px;\">We're here to help!</h1>\n    </div>\n    \n    <div style=\"padding: 30px; color: #444444; line-height: 1.6;\">\n        <p>Hi <strong>{{ $('Webhook').item.json.body.name }}</strong>,</p>\n        \n        <p>We noticed that you tried to make a payment of <strong>₦{{ $('Webhook').item.json.body.amount }}</strong> earlier today, but it didn't quite go through.</p>\n        \n        <div style=\"background-color: #fff9db; padding: 15px; border-left: 5px solid #fcc419; margin: 20px 0;\">\n            <p style=\"margin: 0; font-size: 14px; color: #856404;\">\n                <strong>Don't worry:</strong> This usually happens due to temporary bank network delays or card authorization limits. Your order hasn't been cancelled yet!\n            </p>\n        </div>\n\n        <p>If you'd like to try again, you can use the original payment link or click the button below to resume where you left off:</p>\n        \n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"RETRY_LINK_OR_SITE_URL\" style=\"background-color: #2c3e50; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">Resume My Order</a>\n        </div>\n        \n        <p><strong>Need a different payment method?</strong><br>\n        If your card continues to have issues, just reply to this email. We can also provide bank transfer details or alternative options to make it easier for you.</p>\n        \n        <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n        \n        <p style=\"margin: 0; font-size: 14px;\">Thank you for choosing <strong>YourDomain</strong>.</p>\n        <p style=\"margin: 0; font-weight: bold; color: #00a859;\">— The Support Team</p>\n    </div>\n    \n    <div style=\"background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #999;\">\n        <p>Transaction Reference: {{ $json.Reference }}</p>\n    </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        0
+      ],
+      "id": "1cc16025-a0d0-4f10-8de7-20fa7aeff1b4",
+      "name": "Send Rescue Message to complete Payment",
+      "webhookId": "34b2ec5c-41db-4b50-aac7-dfc111cd2635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N Automations MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1558116007,
+          "mode": "list",
+          "cachedResultName": "Customer Review: Loyalty Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1558116007"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Email": "={{ $('Determine Success').item.json.email }}",
+            "Customer Name": "={{ $('Determine Success').item.json.name }}",
+            "Total Spent": "={{ $('Determine Success').item.json.totalSpent }}",
+            "Purchase Count": "={{ $('Determine Success').item.json.purchaseCount }}"
+          },
+          "matchingColumns": [
+            "Customer Email"
+          ],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Email",
+              "displayName": "Customer Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Spent",
+              "displayName": "Total Spent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Purchase Count",
+              "displayName": "Purchase Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        -192
+      ],
+      "id": "9c98bc16-78aa-47d6-8974-77dea81c0703",
+      "name": "Update Customer for Loyalty Count",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N ECommerce MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1558116007,
+          "mode": "list",
+          "cachedResultName": "Customer Review: Loyalty Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1558116007"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Customer Email",
+              "lookupValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -272,
+        -96
+      ],
+      "id": "a29cde98-2605-4715-8edb-dcf05f017654",
+      "name": "Get Customer emails to track if new or returning customer",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "69ffebc2-c0f1-4eaf-a023-c8cdc5cfc0e8",
+              "leftValue": "={{ $('Determine Success').item.json.status }}",
+              "rightValue": "Success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -192
+      ],
+      "id": "0c42794c-1aef-46e0-95ca-5f428269b461",
+      "name": "If Payment is successful"
+    },
+    {
+      "parameters": {
+        "sendTo": "raphael.ajima@homnics.com",
+        "subject": "Checking up on you",
+        "message": "=<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;\">\n    <div style=\"background-color: #00a859; padding: 20px; text-align: center;\">\n        <h1 style=\"color: #ffffff; margin: 0; font-size: 24px;\">How did we do?</h1>\n    </div>\n    <div style=\"padding: 30px; color: #333333; line-height: 1.6;\">\n        <p>Hi <strong>{{ $json.body.name }}</strong>,</p>\n        <p>It's been a week since your purchase of <strong>₦{{ $json.body.amount }}</strong>. We hope you're enjoying your {{ $json.body.product }}!</p>\n        <p>We're a small business and your feedback is our lifeblood. If you had a great experience, would you mind taking 30 seconds to leave us a review?</p>\n        \n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"YOUR_GOOGLE_REVIEW_LINK_HERE\" style=\"background-color: #00a859; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;\">Leave a Review</a>\n        </div>\n        \n        <p style=\"font-size: 14px; color: #777;\">If something wasn't perfect, please just reply to this email and let me know personally. I'm here to fix it.</p>\n        <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 20px 0;\">\n        <p style=\"margin: 0;\">Best regards,</p>\n        <p style=\"margin: 0; font-weight: bold;\">The Team at YourDomain</p>\n    </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        -192
+      ],
+      "id": "214f90f8-102c-4899-bac1-9a5e81c71eca",
+      "name": "Follow up to leave a review",
+      "webhookId": "0407154d-d426-4d6e-8c70-c89fd42c849e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Webhook').first().json.body;\n\n// Determine status based on the Paystack event type\nconst status = (data.event === 'charge.success') ? 'Success' : 'Failed';\n\n// Get existing loyalty data (if this node follows a Lookup node)\nlet totalSpent =  $input.first().json['Total Spent']|| 0;\nlet purchaseCount = $input.first().json['Purchase Count'] || 0;\n\nif (status === 'Success') {\n  totalSpent += data.amount;\n  purchaseCount += 1;\n}\n\nreturn {\n  json: {\n    email: data.email,\n    name: data.name,\n    amount: data.amount,\n    status: status,\n    reference: data.reference,\n    date: new Date().toISOString().split('T')[0],\n    totalSpent: totalSpent,\n    purchaseCount: purchaseCount,\n    product: data.product\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -96
+      ],
+      "id": "38218957-c164-4b07-ba3c-722ebc8d118d",
+      "name": "Determine Success"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N Automations MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1613326546,
+          "mode": "list",
+          "cachedResultName": "Customer Review: General Transactions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1613326546"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Amount": "={{  $json.status == \"Failed\" ? 0 : $json.amount }}",
+            "Reference": "={{ $json.reference }}",
+            "Date": "={{ $json.date }}",
+            "Product": "={{ $json.product }}",
+            "Status": "={{ $json.status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reference",
+              "displayName": "Reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "d30f40e3-7033-493e-83a3-443102a7947d",
+      "name": "Record Transaction",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1: Payment Webhook & Recovery",
+        "height": 688,
+        "width": 2400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -752,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "ea538807-7479-4bb7-bb60-7d6945e1130b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "The Gateway. This section listens for every Paystack payment and checks if the buyer is a new or returning VIP.",
+        "height": 208,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "b79c27c0-3e3f-4b37-9483-aa48eba8a204",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "All successful and failed attempts are logged here for full accounting transparency.",
+        "height": 208,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "c792e98a-d8c0-4cce-abe0-77541c8920b1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "The system detects bank failures instantly, it then sends a branded message to save the sale.\n",
+        "height": 192,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "86713942-9d26-46af-9dc0-9242fddad59e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "For successful sales, we track the total spend and wait seven days before asking for a review.\n",
+        "height": 144,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        928,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "4d1aacae-7454-4526-b047-923bc518979e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "This branch triggers on declines, helping customers complete orders during network issues.",
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "b36bc999-7f3f-436a-a7e4-c11e63594e86",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        800
+      ],
+      "id": "5976490f-cbc4-4801-a541-22b983f4abbd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "=youremail@mail.com",
+        "subject": "Monthly business report",
+        "message": "={{ $('Calculate Revenue').item.json.html_report }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        704
+      ],
+      "id": "1480ad69-b738-4346-82de-e027d0bf8749",
+      "name": "Send a message",
+      "webhookId": "f5989434-9b85-4795-8540-a5ffd46f0314",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N ECommerce MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1613326546,
+          "mode": "list",
+          "cachedResultName": "Customer Review: General Transactions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1613326546"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        112,
+        800
+      ],
+      "id": "6db307bc-9da9-49a3-a8f6-fe3892724660",
+      "name": "Get Transactions from Table",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6e434423-8030-4cd1-a982-76b6bce8a57c",
+              "leftValue": "={{ $('Get Previous Month Report').item.json.startDate }}",
+              "rightValue": "={{ $json.Date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "605a79bb-174f-49de-8715-c593afbc9750",
+              "leftValue": "={{ $('Get Previous Month Report').item.json.endDate }}",
+              "rightValue": "={{ $json.Date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        800
+      ],
+      "id": "4978f2e5-0239-404e-8d1a-f9c275c6fdc0",
+      "name": "Check for transactions from previous month"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst dateInfo = $('Get Previous Month Report').first().json;\n\nlet successRev = 0;\nlet failedRev = 0;\nlet successCount = 0;\nlet failedCount = 0;\n\n// 1. Process all transactions\nitems.forEach(item => {\n  const amt = parseFloat(item.json.Amount || 0);\n  if (item.json.Status === 'Success') {\n    successRev += amt;\n    successCount++;\n  } else {\n    failedRev += amt;\n    failedCount++;\n  }\n});\n\n// 2. Calculate metrics\nconst totalAttempts = items.length;\nconst successRate = totalAttempts > 0 ? ((successCount / totalAttempts) * 100).toFixed(1) + '%' : '0%';\nconst avgOrderValue = successCount > 0 ? (successRev / successCount) : 0;\n\n// 3. Prepare data for Google Sheets and Gmail\nreturn {\n  json: {\n    // Analytics Sheet Data\n    Month: dateInfo.monthName,\n    Year: dateInfo.year,\n    \"Total Sales\": successRev,\n    \"Failed Revenue\": failedRev,\n    \"Net Profit\": successRev,\n    \"Success Rate\": successRate,\n    \n    // Email Report Data\n    report_date: `${dateInfo.monthName} ${dateInfo.year}`,\n    html_report: `\n<div style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 650px; margin: auto; border: 1px solid #dcdcdc; border-radius: 10px; background-color: #f9f9f9;\">\n    <div style=\"background-color: #2c3e50; padding: 25px; color: #ffffff; border-radius: 10px 10px 0 0;\">\n        <h2 style=\"margin: 0; font-size: 22px;\">Monthly Business Pulse</h2>\n        <p style=\"margin: 5px 0 0; font-size: 14px; opacity: 0.8;\">Summary for ${dateInfo.monthName} ${dateInfo.year}</p>\n    </div>\n    \n    <div style=\"padding: 30px;\">\n        <p>Hello,</p>\n        <p>Here is your performance summary. Our recovery system is actively monitoring all transaction attempts.</p>\n        \n        <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n            <tr>\n                <td style=\"padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; text-align: center;\">\n                    <span style=\"display: block; font-size: 11px; color: #888; text-transform: uppercase;\">Successful Revenue</span>\n                    <strong style=\"font-size: 18px; color: #27ae60;\">₦${successRev.toLocaleString()}</strong>\n                </td>\n                <td style=\"padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; text-align: center;\">\n                    <span style=\"display: block; font-size: 11px; color: #888; text-transform: uppercase;\">Failed Revenue (At Risk)</span>\n                    <strong style=\"font-size: 18px; color: #e74c3c;\">₦${failedRev.toLocaleString()}</strong>\n                </td>\n            </tr>\n            <tr>\n                <td style=\"padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; text-align: center;\">\n                    <span style=\"display: block; font-size: 11px; color: #888; text-transform: uppercase;\">Success Rate</span>\n                    <strong style=\"font-size: 18px; color: #2c3e50;\">${successRate}</strong>\n                </td>\n                <td style=\"padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; text-align: center;\">\n                    <span style=\"display: block; font-size: 11px; color: #888; text-transform: uppercase;\">Avg. Order Value</span>\n                    <strong style=\"font-size: 18px; color: #2980b9;\">₦${avgOrderValue.toFixed(2)}</strong>\n                </td>\n            </tr>\n        </table>\n\n        <div style=\"background-color: #fff9db; padding: 15px; border-left: 5px solid #fcc419; margin-top: 20px;\">\n            <p style=\"margin: 0; font-size: 14px; color: #856404;\">\n                <strong>💡 Recovery Insight:</strong> We identified <strong>${failedCount}</strong> failed attempts this month. Our automated rescue system followed up with each one to protect your revenue.\n            </p>\n        </div>\n\n        <p style=\"margin-top: 30px; font-size: 13px; color: #999;\">\n            This report was generated automatically. Your analytics sheet has been updated for ${dateInfo.monthName}.\n        </p>\n    </div>\n</div>`\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        704
+      ],
+      "id": "7f935a98-c749-446d-90e5-0211ba057888",
+      "name": "Calculate Revenue"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N Automations MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1098364255,
+          "mode": "list",
+          "cachedResultName": "Monthly Analytics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1098364255"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Month": "={{ $('Get Previous Month Report').item.json.monthName }}",
+            "Year": "={{ $('Get Previous Month Report').item.json.year }}",
+            "Total Sales": "0",
+            "Net Profit": "0",
+            "Success Rate": "0%",
+            "Failed Revenue": "0"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Month",
+              "displayName": "Month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Year",
+              "displayName": "Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Sales",
+              "displayName": "Total Sales",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Net Profit",
+              "displayName": "Net Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Success Rate",
+              "displayName": "Success Rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Failed Revenue",
+              "displayName": "Failed Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        896
+      ],
+      "id": "b6b56c13-e2c7-459e-a205-2a0a417e0954",
+      "name": "Record Failed Monthly Analytics",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 2: Business Reporting\n",
+        "height": 704,
+        "width": 2416,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        560
+      ],
+      "typeVersion": 1,
+      "id": "70dc5435-8ad6-44e2-9aac-4d53caf0d04f",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "On the first of every month, this branch reviews performance and replaces manual data entry.",
+        "height": 176,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        560
+      ],
+      "typeVersion": 1,
+      "id": "23984136-10e9-4384-baf7-da478623c2f3",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE",
+          "mode": "list",
+          "cachedResultName": "N8N ECommerce MegaSheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1098364255,
+          "mode": "list",
+          "cachedResultName": "Monthly Analytics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytSgZrvlU8PbPpNsedU1sEPzGi8VIukHjd0lOIYJHNE/edit#gid=1098364255"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Month": "={{ $json.Month }}",
+            "Year": "={{ $json.Year }}",
+            "Total Sales": "={{ $json['Total Sales'] }}",
+            "Net Profit": "={{ $json['Net Profit'] }}",
+            "Success Rate": "={{ $json['Success Rate'] }}",
+            "Failed Revenue": "={{ $json['Failed Revenue'] }}"
+          },
+          "matchingColumns": [
+            "Month"
+          ],
+          "schema": [
+            {
+              "id": "Month",
+              "displayName": "Month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Year",
+              "displayName": "Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Sales",
+              "displayName": "Total Sales",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Net Profit",
+              "displayName": "Net Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Success Rate",
+              "displayName": "Success Rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Failed Revenue",
+              "displayName": "Failed Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        704
+      ],
+      "id": "11e65652-94f0-4b80-9106-43825fb6095e",
+      "name": "Record Monthly Summary",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@mail.com",
+        "subject": "Monthly business report",
+        "message": "=<div style=\"font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;\">\n  <h2 style=\"color: #2c3e50;\">Monthly Pulse: {{ $('Get Previous Month Report').item.json.monthName }}</h2>\n  <p>Hello! Your automated system checked the records for last month.</p>\n  <div style=\"background-color: #f8f9fa; padding: 15px; border-left: 5px solid #3498db;\">\n    <p><strong>Note:</strong> No transactions were recorded in the 'Transactions' sheet for this period.</p>\n  </div>\n  <p>The analytics log has been updated with 0 values to keep your records consistent. If this is unexpected, please check your Paystack connection.</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        896
+      ],
+      "id": "40477979-324c-403f-afae-dc8969aed391",
+      "name": "Zero Previous Month Record Business Summary",
+      "webhookId": "f5989434-9b85-4795-8540-a5ffd46f0314",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// This script runs on the 1st of the month to look back at the previous month\nconst now = new Date();\n\n// Calculate the first day of the previous month\nconst start = new Date(now.getFullYear(), now.getMonth() - 1, 1);\n// Calculate the last day of the previous month\nconst end = new Date(now.getFullYear(), now.getMonth(), 0);\n\n// Helper function to format as YYYY-MM-DD for Google Sheets\nconst formatDate = (date) => date.toISOString().split('T')[0];\n\nreturn {\n  startDate: formatDate(start),\n  endDate: formatDate(end),\n  monthName: start.toLocaleString('default', { month: 'long' }),\n  year: start.getFullYear()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        800
+      ],
+      "id": "559be4f7-7193-466a-9cdf-55c984f83ee9",
+      "name": "Get Previous Month Report"
+    },
+    {
+      "parameters": {
+        "content": "This node calculates previous month dates, it keeps your reporting clean and cloud costs low.\n",
+        "height": 176,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        560
+      ],
+      "typeVersion": 1,
+      "id": "fb6bbe92-7d0a-41cd-a964-f90734ab1fb4",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "This check logs zero values for quiet months, this ensures your analytics history stays unbroken.\n",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "856584b1-8028-4774-9724-8467eea1a562",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Raw data transforms into insights like success rates, it gives you the same depth as big companies.",
+        "height": 128,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        528,
+        560
+      ],
+      "typeVersion": 1,
+      "id": "d5d89bff-c590-4c94-8575-4d20487f2d57",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "Branded reports are delivered directly to the owner, they are easy to read on any mobile device.",
+        "height": 128,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        560
+      ],
+      "typeVersion": 1,
+      "id": "2630e0d8-6be0-48cc-9b58-a71057c736e0",
+      "name": "Sticky Note11"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Customer emails to track if new or returning customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Follow up to leave a review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If Payment is successful",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Event is Charge Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Event is Charge Failed": {
+      "main": [
+        [
+          {
+            "node": "Send Rescue Message to complete Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer emails to track if new or returning customer": {
+      "main": [
+        [
+          {
+            "node": "Determine Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Customer for Loyalty Count": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Payment is successful": {
+      "main": [
+        [
+          {
+            "node": "Update Customer for Loyalty Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Success": {
+      "main": [
+        [
+          {
+            "node": "Record Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Transaction": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Previous Month Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transactions from Table": {
+      "main": [
+        [
+          {
+            "node": "Check for transactions from previous month",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for transactions from previous month": {
+      "main": [
+        [
+          {
+            "node": "Calculate Revenue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Failed Monthly Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Revenue": {
+      "main": [
+        [
+          {
+            "node": "Record Monthly Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Failed Monthly Analytics": {
+      "main": [
+        [
+          {
+            "node": "Zero Previous Month Record Business Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Monthly Summary": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Previous Month Report": {
+      "main": [
+        [
+          {
+            "node": "Get Transactions from Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "lpYUTXS2A2DJZuQ6XQ4XY",
+    "timeSavedPerExecution": 20
+  },
+  "versionId": "83328eb5-4b91-4c2f-9564-9017e03c6951",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "65efa035248b15e3b183bef7d989afbe6e7286ab0b8a4194900ab11e005c5805"
+  },
+  "id": "IaoetiUbuCd7EMU-28M8S",
+  "tags": []
+}

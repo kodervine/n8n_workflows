@@ -1,0 +1,729 @@
+{
+  "name": "audit-gmail-attachment-to-drive",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": " 0 8 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        -64
+      ],
+      "id": "ffd0584d-972c-47f7-944e-cda13f6870ee",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "Label_367711583661497740"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "=attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        -64
+      ],
+      "id": "2a12b3da-4033-45b6-8d06-e6195f53f0fd",
+      "name": "Get many messages",
+      "webhookId": "f75103dc-eee8-407d-b345-e28aaf64223f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d0238435-ae12-460b-b752-f40c8a9b1fb4",
+              "leftValue": "={{ $json.headers['content-type'] }}",
+              "rightValue": "multipart/mixed",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -576,
+        -64
+      ],
+      "id": "ae78e7fc-2d97-46f1-bbb8-a36e99e23066",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -64
+      ],
+      "id": "f48ce9d4-e716-41cd-97e5-21cf413380d6",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This collects every item coming out of the Split Out node\nconst allSplitItems = $input.all(); \n\nconst processedData = [];\n\nfor (const item of allSplitItems) {\n  // 1. Get the subject (Ensure \"subject\" is in \"Fields to Keep\" in Split Out node)\n  const subject = item.json.subject || \"\";\n  \n  // 2. Regex logic\n  const clientMatch = subject.match(/^([^/]+)/);\n  const controlMatch = subject.match(/\\/([^/]+)$/);\n\n  // Access the binary property using bracket notation to avoid Type Errors\n  const binaryObject = item.binary?.data;\n  \n  // Logic: Check if the Base64 'data' property contains the '/Encrypt' flag\n  // 'L0VuY3J5cHQ' is the Base64 signature for encrypted PDFs\n  const isLocked = binaryObject && binaryObject[\"data\"] \n    ? binaryObject[\"data\"].includes('L0VuY3J5cHQ') \n    : false;\n  \n  // 3. Create a new object that includes BOTH json and binary\n  processedData.push({\n    json: {\n      client: clientMatch ? clientMatch[1].trim() : 'Unknown',\n      control_id: controlMatch ? controlMatch[1].trim() : 'Unknown',\n      is_protected: isLocked, // This is your \"Triage\" flag\n      emailId: item.json.id, \n      attachmentName: item.json.name,\n      year: 2026,\n      receivedAt: item.json.date,\n      subject: subject,\n      senderEmail: item.json.from?.value[0]?.address || 'Unknown',\n      senderName: item.json.from?.value[0]?.name || 'Unknown',\n      status: isLocked ? \"Quarantine: Encrypted\" : \"Audit: Verified\"\n    },\n    // IMPORTANT: This line carries the file data to the next node\n    binary: item.binary \n  });\n}\n\nreturn processedData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -64
+      ],
+      "id": "5e0e6373-d6d4-4d2b-8f88-e20f68497fbd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "attachment_0",
+        "name": "={{ $('Code in JavaScript').item.json.receivedAt }}_{{ $('Code in JavaScript').item.json.subject }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1THvO4RWJzsoSdQ73D299XVgKlHGRvbia",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        544,
+        32
+      ],
+      "id": "874857d0-a738-49de-af9a-a70207a35bf4",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EW9N3nxlBGiNiQ47",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        32
+      ],
+      "id": "54857dc4-3b1e-4e2f-863f-d49de84c7181",
+      "name": "Wait",
+      "webhookId": "f606c5b9-77b4-4527-b271-f733dea9e07c"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk",
+          "mode": "list",
+          "cachedResultName": "N8N Automations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Gmail Attachment Arrangement",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Id": "={{ $('Code in JavaScript').item.json.emailId }}",
+            "Client": "={{ $('Code in JavaScript').item.json.client }}",
+            "File": "={{ $json.id }}",
+            "Timestamp": "={{ $('Code in JavaScript').item.json.receivedAt }}",
+            "Sender": "={{ $('Code in JavaScript').item.json.senderEmail }}"
+          },
+          "matchingColumns": [
+            "Email Id"
+          ],
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Id",
+              "displayName": "Email Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        32
+      ],
+      "id": "97f064af-ae83-499b-8b6a-23206b999dbd",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json['Email Id'] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        32
+      ],
+      "id": "7c0fed05-5e36-4c67-862c-0bf47a111c75",
+      "name": "Mark a message as read",
+      "webhookId": "a4c050cb-41bd-40e8-927d-cfd04c326001",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "This automated system acts as a Digital Auditor for your inbox. It monitors your emails, identifies audit documents, and organizes them so you don't have to.\n\n🛡️ What the Workflow Does\nMonitors & Filters: Constantly checks for new emails and ignores anything that isn't a specific audit request.\n\nExtracts & Labels: Scans the email subject to pull out the Client Name and Year, then attaches these details to the file.\n\nSecurity Triage: Inspects every document to see if it is password-protected before saving it.\n\nOrganized Storage: Moves open files to your main audit folder and isolates \"Locked\" files in a quarantine folder so they don't block your work.\n\nAutomated Follow-up: Instantly messages the sender if their file is locked, asking them for an unlocked version so you don't have to chase them manually.\n\nCentral Tracking: Logs every action, file link, and status update into a master Google Sheet for a clear bird's-eye view.\n\n📌 Sticker Note One-Liners\nIf Node: A security gate that separates \"Ready-to-Audit\" files from \"Locked\" ones.\n\nQuarantine: A safe zone for encrypted files to keep your main folders clean.\n\nAuto-Nudge: An instant notification to senders when they submit a password-protected file.\n\nAudit Trail: Every document's status is automatically logged in your master sheet.",
+        "height": 656,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1632,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "12efa4b6-9ae0-4af0-9e48-35c91d4dbfdc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "54b23a52-e3f3-4bf6-aa85-ff2e0f972642",
+              "leftValue": "={{ $json.is_protected }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "4e6976f3-0bcd-4c60-aaac-109ddcd66104",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "attachment_0",
+        "name": "={{ $('Code in JavaScript').item.json.receivedAt }}_{{ $('Code in JavaScript').item.json.subject }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1s5ra8HLvrop_BTnid6U5PgClSDAgWFGc",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        320,
+        -160
+      ],
+      "id": "690ca7ae-71e7-4182-9b00-97e051c47424",
+      "name": "Upload Quarantine Files",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EW9N3nxlBGiNiQ47",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk",
+          "mode": "list",
+          "cachedResultName": "N8N Automations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Gmail Attachment Arrangement",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f7dAoxgveBvvVaH72se9M0GJkstQmHKKPklurMoijPk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Id": "={{ $('Code in JavaScript').item.json.emailId }}",
+            "Client": "={{ $('Code in JavaScript').item.json.client }}",
+            "File": "={{ $json.id }}",
+            "Timestamp": "={{ $('Code in JavaScript').item.json.receivedAt }}",
+            "Sender": "={{ $('Code in JavaScript').item.json.senderEmail }}"
+          },
+          "matchingColumns": [
+            "Email Id"
+          ],
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Id",
+              "displayName": "Email Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -160
+      ],
+      "id": "f89af3bc-a4d5-4d48-bc64-7baa1aa9a9ae",
+      "name": "Append or update row with pending review",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V6uJ6YiFufjXtc2A",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get many messages').item.json.headers.from }}",
+        "subject": "=Re: Document Update",
+        "message": "=Hi {{ $('Get many messages').item.json.headers.from }}. We received your document for {{ $('Code in JavaScript').item.json.subject }}, ({{ $('Code in JavaScript').item.json.control_id }}), but it's password-protected. To complete the audit, please reply with an unlocked version of the file.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "1ee758df-fb72-4d1c-89df-53e1c5a88e57",
+      "name": "Send a message",
+      "webhookId": "aecb3950-3d25-4394-bcfc-f659430eaa92",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6DkFpa5uvVgIQTXZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 640,
+        "width": 2320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "30f48b50-e42e-48fe-90f8-ae3469a54b07",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {
+    "Get many messages": [
+      {
+        "json": {
+          "id": "19bc09180b3516bf",
+          "threadId": "19bc09180b3516bf",
+          "labelIds": [
+            "Label_2628679257419085230",
+            "UNREAD",
+            "IMPORTANT",
+            "Label_367711583661497740",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 584192,
+          "headers": {
+            "delivered-to": "Delivered-To: youremail@mail.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id a640c23a62f3a-b842a3f73fasor637624766b.13.2026.01.14.23.31.59\r\n        for <youremail@mail.com>\r\n        (Google Transport Security);\r\n        Wed, 14 Jan 2026 23:31:59 -0800 (PST)",
+            "x-received": "X-Received: by 2002:a17:906:dc91:b0:b87:2780:1b29 with SMTP id\r\n a640c23a62f3a-b8761139c5bmr451805066b.37.1768462318293; Wed, 14 Jan 2026\r\n 23:31:58 -0800 (PST)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1768462319; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=F88sxFlwzJI/Fn7bRBX6sVlRXXHG4nNtbrD7d0y9EEXPWz1eY5gdlWM9wJcIAopPbU\r\n         nqda4kRlwLFh5Ux+LnnQZ4AysN7QrlG0InnxNFSp4SdTVA6NDrlJhcZ6ePiX7em/92rh\r\n         0ZYzBD1unzYMCrZOEQxVFtctdJef1d3XI++IbWR5qnMd/h0ZALvpRmmV3ha/jjyL0xrA\r\n         YbTXRfqPFiHHbZ+bbwdouCULLjj0G6W67xun37Wj6UefuQPSvYR8uCpPddd7aV+wFVOw\r\n         HGK7g8VqYqXsVZoUvapioR4KHCKQZNGJMyyRk0xJA4sduD4PYewr6lSBzZEygQ+o05wh\r\n         DKMQ==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=sOuOq5WjIdvnmKAtEIz3orkAMRkvkY2hQWbkXDkqCxo=;\r\n        fh=ukTMTIdCcNmbV9LiQt9wd4xYbpUarnegD/wOKu2DfQc=;\r\n        b=IzGlpBoVYPkwyfwQ26nRyiI3SqOKgREMckvhbxAn+/lrPMyZwgBduKqzJaEj+0rwKi\r\n         Pya1qxzoKdBlkEf/MoivI0GgUX2175+MMdv2RxB3TsGrLu9/AwRghxaRWOf/Tp2M2GUT\r\n         kMLLynziqnDozlf1WfcuzxaShRDMm46lwzqyA+9Q+bRyvtCj/F/7NvbCRxzhNIVamt5e\r\n         TwLsZvbMNPj46aljXiztIFEFX7VpziwMluj+W2n/5pFztLKoeEv2sJj1bvthxsGQg5iS\r\n         nbMDB5rkxY1CsA5iBkOSkbnt+p4g7QQalt6ptqG1XyYaICe+FFajsxkEb7CBRtf4Kjwk\r\n         LP/g==;\r\n        dara=google.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=isNwZUWZ;\r\n       spf=pass (google.com: domain of youremail@mail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=youremail@mail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@gmail.com",
+            "return-path": "Return-Path: <youremail@mail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of youremail@mail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=isNwZUWZ;\r\n       spf=pass (google.com: domain of youremail@mail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=youremail@mail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@gmail.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1768462319; x=1769067119; dara=google.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=sOuOq5WjIdvnmKAtEIz3orkAMRkvkY2hQWbkXDkqCxo=;\r\n        b=isNwZUWZFnkyRgd6otGM4ntdEbTk+m959hqkvQUnDGg9kmsZc8ybSyWPCK4+YqxO5/\r\n         NHzyz7mwu9cE577exCIQmRtxzm0iDpzjo6HGxJcBygB5jD9X7lP05JF/Sz3tsJWTEKVm\r\n         Eq4ltHVIbRup2UbiCO+7Xt8bsuBN4VACT9N4msVzHDCnyn2ARqTpB+zvTIRJSK5uf8xP\r\n         hNXRHGkdssJmFADmlq0pxQ/TUTeWARGrAhg2+jqG1hz+CMHrt/A80aQIU5HyP6zf8bbh\r\n         zqYtzpCudBjyGcIE+MLoPop00jCTjY49iJBMAINN35wPTHgaUcNTfS33h+nyAZvPP7v8\r\n         7nsg==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1768462319; x=1769067119;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-gg\r\n         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;\r\n        bh=sOuOq5WjIdvnmKAtEIz3orkAMRkvkY2hQWbkXDkqCxo=;\r\n        b=m0Pjh3lG14rHkEk/XIuDqyxSpYv740V2+t6fDRy1WB01tr9G3WLagFW0YeHKUYkEhm\r\n         4EJI6tFBtkLM5kYkX/0BUXNZXn++PXlRZiVi7ucMm4yhclrhZZHofdRZs+2umoicORDJ\r\n         8fKMcyxiPVg4xYnGSmIWNzNd2ndDttfqjeZYpsXCql0oWkm/3pGcHzCyPsT3DVcirUr8\r\n         sQUxc+bF6nhqvN7qhy/Oycbife51Vr7/roMmYyZsOWOLXTut1qUjzDeN+mKNkoOhnvOz\r\n         Gf5dBGl5VGc1CYoNYlN8hHQk8TYm5RhGP4u7Hy1qQiLQ7J+zg0fKPOsWCbH9Y6KcrRyR\r\n         825A==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0Yyuw/fnbYB3ihOwaVuE+vifl6qxMimhN0YOL7ffTZraekyUBvhg\r\n\tC3wFs71hhV7l9u+MKqLGQFgtuHg2oLC759DDAJN1PqlJbKyc5Tej3Kl+3qW37Jh1oUJlzhXXPsU\r\n\tpBlQBe/GNpZP1TiP7CAAlOkmJysfOL3UKf6ev",
+            "x-gm-gg": "X-Gm-Gg: AY/fxX41+43WZ4fknr/6mNEu5gxn23E4dSKezHN7/ER+8HDtxrF213fIXiCl+a68S7f\r\n\tXWNMP0N/AKXjZmFwbHQ4vbTluVUe5ZPdaJq0WLS7fKrENhKtNbArsIOx+Twa/GbR8Dm7rn239z+\r\n\tODhYwRTQdg3SH8q0W0+zKfGCAu0vC5gtx0nJ0Jl+KloYRQGAs5zv2zP8Ji38IMCjMhHaV99XSVA\r\n\tmWDUbAt5VnMPa3TzFAO0VLPlHXieFZXR1sue9B8FPe5sKHl/JPC+J/kVXOfKfkSYFR6rffWzkM=",
+            "mime-version": "MIME-Version: 1.0",
+            "from": "From: Chinenye Anikwenze <youremail@mail.com>",
+            "date": "Date: Thu, 15 Jan 2026 08:31:45 +0100",
+            "x-gm-features": "X-Gm-Features: AZwV_QjloBCretI3pgxC5aKGV_Lc-WMwG-W0rIw499yBQ9YtGWrlDm8uO_5MnQA",
+            "message-id": "Message-ID: <CAEk6uDzptr4t5juk=_q90wyHOt3JcfqCpdkpPRgUnBA7odXaJA@mail.gmail.com>",
+            "subject": "Subject: Audit Update",
+            "to": "To: Chinny Anikwenze <youremail@mail.com>",
+            "content-type": "Content-Type: multipart/mixed; boundary=\"0000000000004824ce0648683864\""
+          },
+          "html": "<div dir=\"auto\">Hello,<div dir=\"auto\"><br></div><div dir=\"auto\">Sending an audit update for formatting </div></div>\n",
+          "text": "Hello,\n\nSending an audit update for formatting\n",
+          "textAsHtml": "<p>Hello,</p><p>Sending an audit update for formatting</p>",
+          "subject": "Audit Update",
+          "date": "2026-01-15T07:31:45.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "youremail@mail.com",
+                "name": "Chinny Anikwenze"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Chinny Anikwenze</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
+            "text": "\"Chinny Anikwenze\" <youremail@mail.com>"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "youremail@mail.com",
+                "name": "Chinenye Anikwenze"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Chinenye Anikwenze</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
+            "text": "\"Chinenye Anikwenze\" <youremail@mail.com>"
+          },
+          "messageId": "<CAEk6uDzptr4t5juk=_q90wyHOt3JcfqCpdkpPRgUnBA7odXaJA@mail.gmail.com>"
+        },
+        "binary": {
+          "attachment_0": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "Opportunities_Directory_Complete_Directory_2026-01-06.pdf",
+            "id": "filesystem-v2:workflows/WYEv2Cg06_9WdoLDRXgl8/executions/465/binary_data/7b99b92a-796f-471c-a014-3f304b6e2e78",
+            "fileSize": "422 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Upload Quarantine Files",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Quarantine Files": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append or update row with pending review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "lpYUTXS2A2DJZuQ6XQ4XY",
+    "saveExecutionProgress": true,
+    "timeSavedPerExecution": 5
+  },
+  "versionId": "effdc99e-7aaa-477b-b1c5-748ff70ac539",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "65efa035248b15e3b183bef7d989afbe6e7286ab0b8a4194900ab11e005c5805"
+  },
+  "id": "WYEv2Cg06_9WdoLDRXgl8",
+  "tags": []
+}

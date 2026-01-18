@@ -63,7 +63,7 @@
           "__rl": true,
           "value": "C0A7MKG2VT3",
           "mode": "list",
-          "cachedResultName": "all-cysafepath"
+          "cachedResultName": "all-YourDomain"
         },
         "messageType": "block",
         "blocksUi": "={{ $json.blocks }}",
@@ -91,7 +91,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map((item, index) => {\n  try {\n    const rawText = item.json.content.parts[0].text;\n    const cleanText = rawText.replace(/```json|```/g, \"\").trim();\n    const cleanData = JSON.parse(cleanText);\n    \n    // Fallback logic to prevent \"undefined\"\n    const source = $(\"Remove Duplicates\").all()[index]?.json || {};\n\n    return {\n      json: {\n        title: source.title || \"Unknown Threat Title\",\n        link: source.link || \"https://cysafepath.com\",\n        summary: cleanData.summary || \"Summary currently being analyzed...\",\n        severity: cleanData.severity || 3,\n        mitigation: cleanData.mitigation || \"Consult internal security policy.\",\n        category: cleanData.category || \"General Security\"\n      }\n    };\n  } catch (e) {\n    return { json: { error: \"Check AI Output Format\", title: \"Data Parsing Error\" } };\n  }\n});"
+        "jsCode": "return $input.all().map((item, index) => {\n  try {\n    const rawText = item.json.content.parts[0].text;\n    const cleanText = rawText.replace(/```json|```/g, \"\").trim();\n    const cleanData = JSON.parse(cleanText);\n    \n    // Fallback logic to prevent \"undefined\"\n    const source = $(\"Remove Duplicates\").all()[index]?.json || {};\n\n    return {\n      json: {\n        title: source.title || \"Unknown Threat Title\",\n        link: source.link || \"https://YourDomain.com\",\n        summary: cleanData.summary || \"Summary currently being analyzed...\",\n        severity: cleanData.severity || 3,\n        mitigation: cleanData.mitigation || \"Consult internal security policy.\",\n        category: cleanData.category || \"General Security\"\n      }\n    };\n  } catch (e) {\n    return { json: { error: \"Check AI Output Format\", title: \"Data Parsing Error\" } };\n  }\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -104,9 +104,9 @@
     },
     {
       "parameters": {
-        "sendTo": "=anikwenzekelly@gmail.com",
+        "sendTo": "=youremail@mail.com",
         "subject": "=Daily Market Report",
-        "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Severity: ${item.severity}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by CySafePath</small></p>",
+        "message": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Severity: ${item.severity}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by YourDomain</small></p>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
@@ -174,10 +174,10 @@
     },
     {
       "parameters": {
-        "fromEmail": "intel@cysafepath.com",
-        "toEmail": "anikwenzekelly@gmail.com",
+        "fromEmail": "youremail@mail.com",
+        "toEmail": "youremail@mail.com",
         "subject": "Executive Industry Report",
-        "html": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Severity: ${item.severity}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by CySafePath</small>\n<small>intel@cysafepath.com</small>\n</p>",
+        "html": "=<h3>Dear Team,</h3>\n<p>Here are your summarized updates for today:</p>\n<hr>\n\n{{ $json.data.map(item => `\n  <div style=\"margin-bottom: 15px; border-left: 4px solid #008CBA; padding-left: 10px; font-family: sans-serif;\">\n    <h4 style=\"margin: 0; color: #333;\">${item.title}</h4>\n    <p style=\"margin: 5px 0;\"><b>Insight:</b> ${item.summary}</p>\n    <p style=\"font-size: 12px; color: #666;\">\n      Category: ${item.category} | Severity: ${item.severity}/5\n    </p>\n    <a href=\"${item.link}\" style=\"color: #008CBA; font-size: 12px; text-decoration: none; font-weight: bold;\">\n      Read Full Article →\n    </a>\n  </div>\n`).join('<br>') }}\n\n<hr>\n<p><small>Automated Market Intelligence by YourDomain</small>\n<small>youremail@mail.com</small>\n</p>",
         "options": {}
       },
       "type": "n8n-nodes-base.emailSend",

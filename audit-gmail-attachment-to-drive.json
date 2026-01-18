@@ -527,12 +527,12 @@
             "x-gm-message-state": "X-Gm-Message-State: AOJu0Yyuw/fnbYB3ihOwaVuE+vifl6qxMimhN0YOL7ffTZraekyUBvhg\r\n\tC3wFs71hhV7l9u+MKqLGQFgtuHg2oLC759DDAJN1PqlJbKyc5Tej3Kl+3qW37Jh1oUJlzhXXPsU\r\n\tpBlQBe/GNpZP1TiP7CAAlOkmJysfOL3UKf6ev",
             "x-gm-gg": "X-Gm-Gg: AY/fxX41+43WZ4fknr/6mNEu5gxn23E4dSKezHN7/ER+8HDtxrF213fIXiCl+a68S7f\r\n\tXWNMP0N/AKXjZmFwbHQ4vbTluVUe5ZPdaJq0WLS7fKrENhKtNbArsIOx+Twa/GbR8Dm7rn239z+\r\n\tODhYwRTQdg3SH8q0W0+zKfGCAu0vC5gtx0nJ0Jl+KloYRQGAs5zv2zP8Ji38IMCjMhHaV99XSVA\r\n\tmWDUbAt5VnMPa3TzFAO0VLPlHXieFZXR1sue9B8FPe5sKHl/JPC+J/kVXOfKfkSYFR6rffWzkM=",
             "mime-version": "MIME-Version: 1.0",
-            "from": "From: Chinenye Anikwenze <youremail@mail.com>",
+            "from": "From: Your Name <youremail@mail.com>",
             "date": "Date: Thu, 15 Jan 2026 08:31:45 +0100",
             "x-gm-features": "X-Gm-Features: AZwV_QjloBCretI3pgxC5aKGV_Lc-WMwG-W0rIw499yBQ9YtGWrlDm8uO_5MnQA",
             "message-id": "Message-ID: <CAEk6uDzptr4t5juk=_q90wyHOt3JcfqCpdkpPRgUnBA7odXaJA@mail.gmail.com>",
             "subject": "Subject: Audit Update",
-            "to": "To: Chinny Anikwenze <youremail@mail.com>",
+            "to": "To: Name <youremail@mail.com>",
             "content-type": "Content-Type: multipart/mixed; boundary=\"0000000000004824ce0648683864\""
           },
           "html": "<div dir=\"auto\">Hello,<div dir=\"auto\"><br></div><div dir=\"auto\">Sending an audit update for formatting </div></div>\n",
@@ -544,21 +544,21 @@
             "value": [
               {
                 "address": "youremail@mail.com",
-                "name": "Chinny Anikwenze"
+                "name": "Your Name"
               }
             ],
-            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Chinny Anikwenze</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
-            "text": "\"Chinny Anikwenze\" <youremail@mail.com>"
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Your Name</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
+            "text": "\"Your Name\" <youremail@mail.com>"
           },
           "from": {
             "value": [
               {
                 "address": "youremail@mail.com",
-                "name": "Chinenye Anikwenze"
+                "name": "Your Name"
               }
             ],
-            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Chinenye Anikwenze</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
-            "text": "\"Chinenye Anikwenze\" <youremail@mail.com>"
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Your Name</span> &lt;<a href=\"mailto:youremail@mail.com\" class=\"mp_address_email\">youremail@mail.com</a>&gt;</span>",
+            "text": "\"Your Name\" <youremail@mail.com>"
           },
           "messageId": "<CAEk6uDzptr4t5juk=_q90wyHOt3JcfqCpdkpPRgUnBA7odXaJA@mail.gmail.com>"
         },

@@ -92,7 +92,7 @@
           "__rl": true,
           "value": "youremail@mail.com",
           "mode": "list",
-          "cachedResultName": "Chinenye Anikwenze calender "
+          "cachedResultName": "Your Name calender "
         },
         "timeMin": "={{ $fromAI(\"timeToCheck\") }}",
         "timeMax": "={{ DateTime.fromISO($fromAI(\"timeToCheck\")).plus({minutes: 30}) }}",
@@ -119,7 +119,7 @@
           "__rl": true,
           "value": "youremail@mail.com",
           "mode": "list",
-          "cachedResultName": "Chinenye Anikwenze calender "
+          "cachedResultName": "Your Name calender "
         },
         "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
         "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",

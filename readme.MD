@@ -58,7 +58,7 @@ Open your n8n instance, go to **Workflows > Import from File**, and select any `
 Each workflow requires specific credentials (API Keys, OAuth2). 
 <!-- Refer to the `setup.md` in each subfolder for detailed permission requirements. -->
 
----
+<!-- --- -->
 
 <!-- ## **📜 Certifications & Expertise**
 
